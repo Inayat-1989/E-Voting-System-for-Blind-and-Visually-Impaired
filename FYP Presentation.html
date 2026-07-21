@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Voting System — Sprint 1 Review</title>
+<style>
+  :root{
+    --navy:#0D3B66; --teal:#1C7293; --mint:#2A9D8F; --gold:#E9A23B;
+    --ink:#14213D; --light:#EAF4F4; --muted:#5b6b7a; --paper:#ffffff;
+    --line:#d5e1ea;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    background:#0b2036;color:var(--ink);overflow:hidden;
+  }
+  .deck{position:fixed;inset:0}
+  .slide{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    padding:4.2vh 5vw 8vh;background:var(--paper);
+    opacity:0;transition:opacity .25s ease;
+  }
+  .slide.active{display:flex;opacity:1}
+  .kicker{color:var(--teal);font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;font-size:clamp(11px,1.4vw,15px);margin-bottom:.4rem}
+  h1.title{font-size:clamp(26px,4.4vw,52px);color:var(--navy);line-height:1.08;font-weight:800}
+  h2{font-size:clamp(22px,3.4vw,40px);color:var(--navy);line-height:1.1;font-weight:800;margin-bottom:1.2rem}
+  .sub{color:var(--muted);font-size:clamp(14px,1.7vw,20px);margin-top:.5rem}
+  ul{list-style:none;display:flex;flex-direction:column;gap:.7rem;margin-top:.4rem}
+  li{position:relative;padding-left:1.7rem;font-size:clamp(14px,1.75vw,21px);line-height:1.4}
+  li::before{content:"";position:absolute;left:0;top:.5em;width:.7rem;height:.7rem;
+    border-radius:3px;background:var(--gold)}
+  li b{color:var(--navy)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;align-items:center;flex:1;min-height:0}
+  .fill{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .card{background:var(--light);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.3rem}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:.6rem}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:.6rem}
+  .stat{background:var(--navy);color:#fff;border-radius:14px;padding:1.1rem 1.2rem}
+  .stat .n{font-size:clamp(26px,3.6vw,40px);font-weight:800;color:#fff}
+  .stat .l{font-size:clamp(12px,1.4vw,15px);color:#cfe0ee}
+  .pill{display:inline-block;background:var(--mint);color:#fff;border-radius:999px;
+    padding:.15rem .7rem;font-size:.8rem;font-weight:700;letter-spacing:.03em}
+  .must{background:var(--gold);color:var(--ink)}
+  svg{width:100%;height:auto;max-height:100%;display:block}
+  .diagramwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin-top:.4rem}
+  table{border-collapse:collapse;width:100%;font-size:clamp(12px,1.5vw,18px)}
+  th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left}
+  th{background:var(--navy);color:#fff}
+  tbody tr:nth-child(even){background:var(--light)}
+  .story{display:flex;gap:1rem;align-items:flex-start;background:var(--light);
+    border-left:6px solid var(--teal);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.9rem}
+  .story .id{font-weight:800;color:var(--navy);font-size:clamp(15px,1.9vw,22px);white-space:nowrap}
+  .story .tx{font-size:clamp(13px,1.7vw,20px)}
+  .foot{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:38px;display:flex;
+    align-items:center;justify-content:space-between;padding:0 2vw;background:#0b2036;color:#cfe0ee;
+    font-size:13px;z-index:10}
+  .foot .title-mini{font-weight:700;color:#fff;opacity:.9}
+  .nav{display:flex;gap:.5rem;align-items:center}
+  .nav button{background:#12324f;color:#fff;border:0;border-radius:8px;padding:.4rem .7rem;
+    font-size:14px;cursor:pointer}
+  .nav button:hover{background:var(--teal)}
+  .count{opacity:.85;min-width:54px;text-align:center}
+  .bar{position:fixed;left:0;top:0;height:5px;background:var(--gold);z-index:11;transition:width .25s}
+  /* Title slide */
+  .titleslide{background:linear-gradient(135deg,#0D3B66 0%,#123f6e 45%,#1C7293 100%);color:#fff}
+  .titleslide .kicker{color:var(--gold)}
+  .titleslide h1.title{color:#fff}
+  .titleslide .who{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%}
+  .titleslide .who .card{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#eaf4f4}
+  .titleslide .who .card b{color:#fff}
+  .badge{display:inline-block;border:1px solid rgba(255,255,255,.35);border-radius:999px;
+    padding:.25rem .9rem;font-size:.85rem;margin-top:1rem;color:#eaf4f4}
+  .legend{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:.5rem}
+  .legend span{display:flex;align-items:center;gap:.4rem}
+  .sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+  .hint{position:fixed;right:12px;top:10px;color:#cfe0ee;font-size:12px;opacity:.7;z-index:11}
+  @media(max-width:820px){.two,.titleslide .who{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="hint">← → to navigate · F for fullscreen</div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide titleslide">
+    <div class="kicker">Final Year Project · FYP-I · Sprint 1 Review</div>
+    <h1 class="title">E-Voting System for Blind &amp;<br>Visually Impaired Voters</h1>
+    <p class="sub" style="color:#dbe9f4">An accessible, audio-guided web application for inclusive elections</p>
+    <span class="badge">Sprint 1: Voter Identity &amp; Eligibility</span>
+    <div class="who">
+      <div class="card">
+        <b>Team</b><br>
+        Inayat Ullah (S2023065045) — Backend<br>
+        Salar Khan (S2023065088) — AI / Audio<br>
+        Uzair Shakir (S2023065101) — Frontend
+      </div>
+      <div class="card">
+        <b>Supervisor</b><br>Dr. Amber Sultan<br><br>
+        <b>Department of Software Engineering</b><br>University of Management and Technology, Lahore
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 AGENDA -->
+  <section class="slide">
+    <div class="kicker">Agenda</div>
+    <h2>What we'll cover today</h2>
+    <div class="two">
+      <ul>
+        <li><b>The problem</b> — voting barriers for blind citizens</li>
+        <li><b>Our solution</b> — objectives, scope &amp; AI features</li>
+        <li><b>Technology stack</b></li>
+        <li><b>System design</b> — context &amp; data-flow diagrams</li>
+      </ul>
+      <ul>
+        <li><b>Agile process</b> — Scrum, tools &amp; backlog</li>
+        <li><b>Sprint 1</b> — scope, design &amp; flow</li>
+        <li><b>Implementation &amp; testing</b></li>
+        <li><b>Live demo</b>, status &amp; what's next</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3 PROBLEM -->
+  <section class="slide">
+    <div class="kicker">Problem Statement</div>
+    <h2>Blind citizens cannot vote independently or in secret</h2>
+    <div class="two">
+      <ul>
+        <li>Elections rely on <b>printed ballots</b> and in-person polling stations.</li>
+        <li>A voter who cannot see must rely on an <b>assistant</b> to mark the ballot.</li>
+        <li>This removes the <b>secrecy</b> and <b>dignity</b> of an independent vote.</li>
+        <li>Barriers begin before polling day: CNIC, registration, transport, inaccessible premises.</li>
+      </ul>
+      <div class="card">
+        <div class="kicker">The gap</div>
+        <p style="font-size:clamp(15px,2vw,23px);color:var(--navy);font-weight:700;line-height:1.3">
+          There is no accessible, independent and secret way for blind and visually impaired citizens to cast a vote.</p>
+        <p class="sub">Sources: STEP/IFES Pakistan inclusion studies; WCAG 2.1; accessible-voting research.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 OBJECTIVES / SCOPE -->
+  <section class="slide">
+    <div class="kicker">Objectives &amp; Scope</div>
+    <h2>An audio-first, independent, secret ballot</h2>
+    <div class="two">
+      <div>
+        <div class="pill">In scope</div>
+        <ul>
+          <li>Operable entirely by <b>audio output</b> and keyboard.</li>
+          <li><b>CNIC-based</b> identity verification.</li>
+          <li>Exactly <b>one encrypted vote</b> per voter.</li>
+          <li>Results <b>aggregate-only</b>, released after close.</li>
+        </ul>
+      </div>
+      <div>
+        <p class="sub">Primary users: <b>blind &amp; visually impaired</b> voters. Customer: Government / ECP.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 SOLUTION + AI -->
+  <section class="slide">
+    <div class="kicker">Proposed Solution</div>
+    <h2>Accessible web app + AI assistance</h2>
+    <div class="grid3">
+      <div class="card"><b>Accessible by design</b><p class="sub">WCAG 2.1 — screen-reader support, full keyboard, high-contrast &amp; large text.</p></div>
+      <div class="card"><b>Text-to-Speech ballot</b><p class="sub">Candidate names, instructions &amp; confirmations spoken aloud.</p></div>
+      <div class="card"><b>Voice-guided assistant</b><p class="sub">Conversational help through each step (later sprint).</p></div>
+      <div class="card"><b>Secure identity</b><p class="sub">CNIC + OTP; verified as an eligible disabled voter.</p></div>
+      <div class="card"><b>Vote secrecy</b><p class="sub">Encrypted vote; the system never stores who voted for whom.</p></div>
+      <div class="card"><b>Aggregate results</b><p class="sub">Totals per party per constituency, only after close.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 TECH STACK -->
+  <section class="slide">
+    <div class="kicker">Technology Stack</div>
+    <h2>Built on mainstream, maintainable technology</h2>
+    <div class="grid3">
+      <div class="stat"><div class="n">Django</div><div class="l">Backend &amp; admin (Python)</div></div>
+      <div class="stat" style="background:var(--teal)"><div class="n">Bootstrap 5</div><div class="l">HTML / CSS frontend</div></div>
+      <div class="stat" style="background:var(--mint)"><div class="n">SQLite → PostgreSQL</div><div class="l">Dev → production DB</div></div>
+      <div class="stat" style="background:#4a6b86"><div class="n">CNIC / NADRA</div><div class="l">Identity verification</div></div>
+      <div class="stat" style="background:#4a6b86"><div class="n">Web Speech / TTS</div><div class="l">Audio output</div></div>
+      <div class="stat" style="background:#4a6b86"><div class="n">WCAG 2.1</div><div class="l">Accessibility standard</div></div>
+    </div>
+    <p class="sub">Tools: GitHub · GitHub Copilot · Canva</p>
+  </section>
+
+  <!-- 7 CONTEXT DIAGRAM -->
+  <section class="slide">
+    <div class="kicker">System Design</div>
+    <h2>Context Diagram</h2>
+    <div class="diagramwrap">
+      <svg viewBox="0 0 1000 480" role="img" aria-label="Context diagram">
+        <defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#41617a"/></marker></defs>
+        <!-- center system -->
+        <circle cx="500" cy="240" r="120" fill="#0D3B66"/>
+        <text x="500" y="228" text-anchor="middle" fill="#fff" font-size="22" font-weight="700">E-Voting System</text>
+        <text x="500" y="256" text-anchor="middle" fill="#cfe0ee" font-size="16">for Blind Voters</text>
+        <!-- entities -->
+        <g font-size="16" font-weight="700">
+          <rect x="60" y="185" width="190" height="70" rx="10" fill="#1C7293"/><text x="155" y="226" text-anchor="middle" fill="#fff">Blind / VI Voter</text>
+          <rect x="750" y="90" width="190" height="70" rx="10" fill="#1C7293"/><text x="845" y="131" text-anchor="middle" fill="#fff">Admin (Govt / ECP)</text>
+          <rect x="750" y="320" width="190" height="70" rx="10" fill="#6b7a8f"/><text x="845" y="361" text-anchor="middle" fill="#fff">NADRA</text>
+        </g>
+        <g stroke="#41617a" stroke-width="2" fill="none" marker-end="url(#ah)">
+          <path d="M250,215 H378"/><path d="M378,268 H250"/>
+          <path d="M710,140 L620,190"/><path d="M620,300 L710,352"/>
+          <path d="M760,355 L640,300"/><path d="M640,240 L760,150" opacity="0"/>
+        </g>
+        <g font-size="12.5" fill="#27496d">
+          <text x="250" y="205">CNIC, OTP, vote selection</text>
+          <text x="200" y="288">audio prompts, ballot, confirmation</text>
+          <text x="600" y="140">setup, candidates, close</text>
+          <text x="628" y="380">aggregate results</text>
+          <text x="648" y="330" opacity="0"></text>
+          <text x="640" y="290">verify / identity status</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 8 DFD LEVEL 0 -->
+  <section class="slide">
+    <div class="kicker">System Design</div>
+    <h2>Data Flow Diagram — Level 0</h2>
+    <div class="diagramwrap">
+      <svg viewBox="0 0 1040 500" role="img" aria-label="Level 0 data flow diagram">
+        <defs><marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#41617a"/></marker></defs>
+        <!-- entities -->
+        <g font-size="14" font-weight="700">
+          <rect x="20" y="215" width="120" height="60" rx="8" fill="#1C7293"/><text x="80" y="250" text-anchor="middle" fill="#fff">Blind Voter</text>
+          <rect x="900" y="60" width="120" height="60" rx="8" fill="#1C7293"/><text x="960" y="95" text-anchor="middle" fill="#fff">Admin (ECP)</text>
+          <rect x="900" y="410" width="120" height="60" rx="8" fill="#6b7a8f"/><text x="960" y="445" text-anchor="middle" fill="#fff">NADRA</text>
+        </g>
+        <!-- processes -->
+        <g font-size="13" font-weight="700">
+          <circle cx="300" cy="245" r="62" fill="#0D3B66"/><text x="300" y="240" text-anchor="middle" fill="#fff">1.0 Verify</text><text x="300" y="258" text-anchor="middle" fill="#fff">&amp; Login</text>
+          <circle cx="700" cy="110" r="62" fill="#0D3B66"/><text x="700" y="105" text-anchor="middle" fill="#fff">2.0 Manage</text><text x="700" y="123" text-anchor="middle" fill="#fff">Election</text>
+          <circle cx="540" cy="300" r="62" fill="#0D3B66"/><text x="540" y="295" text-anchor="middle" fill="#fff">3.0 Cast</text><text x="540" y="313" text-anchor="middle" fill="#fff">Vote</text>
+          <circle cx="810" cy="300" r="62" fill="#0D3B66"/><text x="810" y="295" text-anchor="middle" fill="#fff">4.0 Tally</text><text x="810" y="313" text-anchor="middle" fill="#fff">&amp; Report</text>
+        </g>
+        <!-- data stores -->
+        <g font-size="12.5" fill="#14213d">
+          <rect x="235" y="410" width="150" height="34" fill="#EAF4F4" stroke="#0D3B66"/><text x="245" y="432">D1 · Voters</text>
+          <rect x="820" y="30" width="200" height="34" fill="#EAF4F4" stroke="#0D3B66"/><text x="830" y="52">D2 · Elections &amp; Candidates</text>
+          <rect x="470" y="410" width="150" height="34" fill="#EAF4F4" stroke="#0D3B66"/><text x="480" y="432">D3 · Votes (enc.)</text>
+          <rect x="730" y="410" width="150" height="34" fill="#EAF4F4" stroke="#0D3B66"/><text x="765" y="432">D4 · Audit Log</text>
+        </g>
+        <!-- flows -->
+        <g stroke="#41617a" stroke-width="2" fill="none" marker-end="url(#a2)">
+          <path d="M140,240 H236"/>            <!-- voter->1 -->
+          <path d="M300,307 V410"/>            <!-- 1->D1 -->
+          <path d="M900,110 H764"/>            <!-- admin->2 -->
+          <path d="M700,64 V48 H820"/>         <!-- 2->D2 -->
+          <path d="M355,255 L481,290"/>        <!-- 1->3 session -->
+          <path d="M650,80 L600,250"/>         <!-- D2/2 ballot->3 -->
+          <path d="M540,362 V410"/>            <!-- 3->D3 -->
+          <path d="M602,300 H748"/>            <!-- 3->4 -->
+          <path d="M810,362 V410"/>            <!-- 4->D4 -->
+          <path d="M872,300 Q950,240 960,122"/>          <!-- 4->admin results -->
+          <path d="M900,430 Q600,470 355,270"/>          <!-- NADRA->1 -->
+        </g>
+        <g font-size="11.5" fill="#27496d">
+          <text x="150" y="232">CNIC, OTP</text>
+          <text x="404" y="262">session</text>
+          <text x="556" y="150">ballot</text>
+          <text x="640" y="292">counts</text>
+          <text x="905" y="250">results</text>
+          <text x="420" y="345">encrypted vote</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:#0D3B66"></i>Process</span>
+      <span><i class="sw" style="background:#1C7293"></i>External entity</span>
+      <span><i class="sw" style="background:#EAF4F4;border:1px solid #0D3B66"></i>Data store</span>
+    </div>
+  </section>
+
+  <!-- 9 ARCHITECTURE -->
+  <section class="slide">
+    <div class="kicker">System Design</div>
+    <h2>Application Architecture</h2>
+    <div class="diagramwrap">
+      <svg viewBox="0 0 1000 430" role="img" aria-label="Architecture diagram">
+        <defs><marker id="a3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#41617a"/></marker></defs>
+        <rect x="40" y="150" width="200" height="120" rx="12" fill="#1C7293"/>
+        <text x="140" y="200" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Browser</text>
+        <text x="140" y="226" text-anchor="middle" fill="#dbe9f4" font-size="13">Templates + Bootstrap</text>
+        <text x="140" y="244" text-anchor="middle" fill="#dbe9f4" font-size="13">Accessible UI</text>
+
+        <rect x="360" y="90" width="300" height="240" rx="12" fill="#0D3B66"/>
+        <text x="510" y="122" text-anchor="middle" fill="#fff" font-size="17" font-weight="700">Django · accounts app</text>
+        <g font-size="13" fill="#0D3B66" font-weight="700">
+          <rect x="385" y="145" width="115" height="42" rx="8" fill="#EAF4F4"/><text x="442" y="171" text-anchor="middle">Views / Forms</text>
+          <rect x="520" y="145" width="115" height="42" rx="8" fill="#EAF4F4"/><text x="577" y="171" text-anchor="middle">Models</text>
+          <rect x="385" y="200" width="250" height="42" rx="8" fill="#EAF4F4"/><text x="510" y="226" text-anchor="middle">Services: CNIC verifier · OTP</text>
+          <rect x="385" y="255" width="250" height="42" rx="8" fill="#EAF4F4"/><text x="510" y="281" text-anchor="middle">Eligibility gate (US-04)</text>
+        </g>
+
+        <rect x="780" y="90" width="180" height="60" rx="10" fill="#2A9D8F"/><text x="870" y="126" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">SQLite / Postgres</text>
+        <rect x="780" y="180" width="180" height="60" rx="10" fill="#6b7a8f"/><text x="870" y="209" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">NADRA (mock)</text><text x="870" y="226" text-anchor="middle" fill="#e7eef4" font-size="11">real API later</text>
+        <rect x="780" y="270" width="180" height="60" rx="10" fill="#6b7a8f"/><text x="870" y="299" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">SMS gateway (mock)</text><text x="870" y="316" text-anchor="middle" fill="#e7eef4" font-size="11">OTP delivery</text>
+
+        <g stroke="#41617a" stroke-width="2" fill="none" marker-end="url(#a3)">
+          <path d="M240,210 H358"/><path d="M358,235 H242" />
+          <path d="M660,150 H778"/><path d="M660,210 H778"/><path d="M660,285 H778"/>
+        </g>
+        <text x="300" y="200" font-size="12" fill="#27496d">HTTPS</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 10 AGILE -->
+  <section class="slide">
+    <div class="kicker">Process</div>
+    <h2>Agile Scrum — 6-week sprints</h2>
+    <div class="two">
+      <ul>
+        <li><b>Framework:</b> Scrum over a 12-month timeline.</li>
+        <li><b>Prioritisation:</b> MoSCoW (Must / Should / Could).</li>
+        <li><b>Estimation:</b> story points (Fibonacci) + hours.</li>
+        <li><b>Ceremonies:</b> planning, stand-ups, review, retrospective.</li>
+      </ul>
+      <div class="grid2">
+        <div class="card center"><b>Jira</b><p class="sub">Backlog &amp; board</p></div>
+        <div class="card center"><b>Slack</b><p class="sub">Communication</p></div>
+        <div class="card center"><b>GitHub</b><p class="sub">Version control</p></div>
+        <div class="card center"><b>Copilot</b><p class="sub">AI-assisted coding</p></div>
+        <div class="card center" style="grid-column:span 2"><b>Figma</b><p class="sub">UI / UX design</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 BACKLOG OVERVIEW -->
+  <section class="slide">
+    <div class="kicker">Requirements</div>
+    <h2>Groomed Product Backlog</h2>
+    <div class="grid3">
+      <div class="stat"><div class="n">7</div><div class="l">Epics</div></div>
+      <div class="stat" style="background:var(--teal)"><div class="n">30</div><div class="l">Active user stories</div></div>
+      <div class="stat" style="background:var(--mint)"><div class="n">156</div><div class="l">Story points</div></div>
+    </div>
+    <ul style="margin-top:1.2rem">
+      <li><b>Epics:</b> Voter Identity &amp; Auth · Accessibility &amp; Audio · Election &amp; Candidate Mgmt · Vote Casting · Results &amp; Audit · Security / NFRs · AI Voice Assistant</li>
+      <li><b>Grooming:</b> split CNIC verification (mock → live NADRA), merged duplicate stories, added acceptance criteria &amp; task owners.</li>
+    </ul>
+  </section>
+
+  <!-- 12 SPRINT 1 SCOPE -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · 19 Jun – 30 Jul 2026</div>
+    <h2>Sprint 1 scope &amp; goal</h2>
+    <p class="sub" style="margin-bottom:1rem"><b>Goal:</b> a voter can register, be verified, log in securely, and the system confirms eligibility before the ballot.</p>
+    <div class="story"><div class="id">US-01 <span class="pill must">Must</span></div><div class="tx">As a voter, I can <b>register with my CNIC</b> so the system knows I am an eligible disabled voter.</div></div>
+    <div class="story"><div class="id">US-03 <span class="pill must">Must</span></div><div class="tx">As a voter, I <b>log in with CNIC + OTP</b> so my account stays secure.</div></div>
+    <div class="story"><div class="id">US-04 <span class="pill must">Must</span></div><div class="tx">As the system, I <b>confirm a voter is registered as disabled</b> before allowing a vote.</div></div>
+  </section>
+
+  <!-- 13 CLASS DIAGRAM -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · Design</div>
+    <h2>Class Diagram</h2>
+    <div class="diagramwrap">
+      <svg viewBox="0 0 1000 440" role="img" aria-label="Sprint 1 class diagram">
+        <defs><marker id="a4" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#14213d"/></marker>
+        <marker id="tri" markerWidth="16" markerHeight="14" refX="14" refY="6" orient="auto"><path d="M0,0 L14,6 L0,12 Z" fill="#fff" stroke="#14213d"/></marker></defs>
+        <!-- User -->
+        <g font-size="13">
+          <rect x="60" y="60" width="260" height="220" rx="6" fill="#f7fbfc" stroke="#0D3B66"/>
+          <rect x="60" y="60" width="260" height="30" fill="#0D3B66"/><text x="190" y="81" text-anchor="middle" fill="#fff" font-weight="700" font-size="15">User</text>
+          <text x="72" y="112">- cnic : char(13)  «unique»</text>
+          <text x="72" y="134">- full_name, phone</text>
+          <text x="72" y="156">- role : voter | admin</text>
+          <text x="72" y="178">- disability_category</text>
+          <text x="72" y="200">- is_disabled, cnic_verified</text>
+          <text x="72" y="222">- phone_verified, is_eligible</text>
+          <line x1="60" y1="234" x2="320" y2="234" stroke="#0D3B66"/>
+          <text x="72" y="256" font-weight="700" fill="#1C7293">+ is_eligible_to_vote : bool</text>
+        </g>
+        <!-- OTPCode -->
+        <g font-size="13">
+          <rect x="60" y="320" width="260" height="100" rx="6" fill="#f7fbfc" stroke="#0D3B66"/>
+          <rect x="60" y="320" width="260" height="30" fill="#0D3B66"/><text x="190" y="341" text-anchor="middle" fill="#fff" font-weight="700" font-size="15">OTPCode</text>
+          <text x="72" y="372">- code, purpose, expires_at</text>
+          <text x="72" y="394">- is_used : bool</text>
+          <text x="72" y="414" font-weight="700" fill="#1C7293">+ is_valid()</text>
+        </g>
+        <!-- Services -->
+        <g font-size="13">
+          <rect x="560" y="70" width="340" height="90" rx="6" fill="#f7fbfc" stroke="#1C7293"/>
+          <rect x="560" y="70" width="340" height="30" fill="#1C7293"/><text x="730" y="91" text-anchor="middle" fill="#fff" font-weight="700" font-size="15">CNICVerifier «service»</text>
+          <text x="572" y="122">+ verify(cnic) : CNICResult</text>
+          <text x="572" y="144" fill="#5b6b7a">Mock now · NADRA later</text>
+
+          <rect x="560" y="185" width="340" height="90" rx="6" fill="#f7fbfc" stroke="#1C7293"/>
+          <rect x="560" y="185" width="340" height="30" fill="#1C7293"/><text x="730" y="206" text-anchor="middle" fill="#fff" font-weight="700" font-size="15">OTPService «service»</text>
+          <text x="572" y="237">+ issue_otp(user, purpose)</text>
+          <text x="572" y="259">+ verify_otp(user, code, purpose)</text>
+
+          <rect x="560" y="300" width="340" height="80" rx="6" fill="#f7fbfc" stroke="#2A9D8F"/>
+          <rect x="560" y="300" width="340" height="30" fill="#2A9D8F"/><text x="730" y="321" text-anchor="middle" fill="#fff" font-weight="700" font-size="15">EligibilityGate (US-04)</text>
+          <text x="572" y="352">+ eligible_required(view)</text>
+          <text x="572" y="372" fill="#5b6b7a">blocks non-eligible voters</text>
+        </g>
+        <g stroke="#14213d" stroke-width="1.6" fill="none">
+          <path d="M190,320 V284" marker-end="url(#a4)"/>
+          <path d="M320,150 H558" marker-end="url(#a4)"/>
+          <path d="M320,210 H558" marker-end="url(#a4)"/>
+          <path d="M320,255 H545 V330 H558" marker-end="url(#a4)"/>
+        </g>
+        <text x="200" y="305" font-size="11" fill="#5b6b7a">1 · *</text>
+        <text x="400" y="142" font-size="11" fill="#5b6b7a">uses</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 14 SPRINT 1 FLOW -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · Flow</div>
+    <h2>Registration → OTP → Eligibility</h2>
+    <div class="diagramwrap">
+      <svg viewBox="0 0 1000 380" role="img" aria-label="Sprint 1 flow">
+        <defs><marker id="a5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#41617a"/></marker></defs>
+        <g font-size="13" font-weight="600">
+          <rect x="20" y="40" width="150" height="60" rx="10" fill="#2A9D8F"/><text x="95" y="66" text-anchor="middle" fill="#fff">Register</text><text x="95" y="84" text-anchor="middle" fill="#eafaf6" font-size="11">CNIC + details</text>
+          <polygon points="230,70 300,40 370,70 300,100" fill="#E9A23B"/><text x="300" y="66" text-anchor="middle" fill="#14213d">CNIC</text><text x="300" y="82" text-anchor="middle" fill="#14213d" font-size="11">verified?</text>
+          <rect x="430" y="40" width="160" height="60" rx="10" fill="#EAF4F4" stroke="#0D3B66"/><text x="510" y="66" text-anchor="middle" fill="#14213d">Create voter</text><text x="510" y="84" text-anchor="middle" fill="#5b6b7a" font-size="11">is_disabled, cnic_verified</text>
+          <rect x="650" y="40" width="150" height="60" rx="10" fill="#EAF4F4" stroke="#0D3B66"/><text x="725" y="66" text-anchor="middle" fill="#14213d">Send OTP</text><text x="725" y="84" text-anchor="middle" fill="#5b6b7a" font-size="11">to mobile</text>
+
+          <rect x="650" y="160" width="150" height="60" rx="10" fill="#EAF4F4" stroke="#0D3B66"/><text x="725" y="186" text-anchor="middle" fill="#14213d">Enter OTP</text>
+          <polygon points="510,190 580,160 650,190 580,220" fill="#E9A23B"/><text x="580" y="186" text-anchor="middle" fill="#14213d">OTP</text><text x="580" y="202" text-anchor="middle" fill="#14213d" font-size="11">valid?</text>
+          <rect x="300" y="160" width="170" height="60" rx="10" fill="#1C7293"/><text x="385" y="186" text-anchor="middle" fill="#fff">Verify + Login</text><text x="385" y="204" text-anchor="middle" fill="#dbe9f4" font-size="11">phone_verified = true</text>
+          <rect x="120" y="160" width="150" height="60" rx="10" fill="#EAF4F4" stroke="#0D3B66"/><text x="195" y="190" text-anchor="middle" fill="#14213d">Dashboard</text>
+
+          <polygon points="120,300 210,270 300,300 210,330" fill="#E9A23B"/><text x="210" y="296" text-anchor="middle" fill="#14213d" font-size="12">Eligible? (US-04)</text><text x="210" y="312" text-anchor="middle" fill="#14213d" font-size="10">disabled + verified</text>
+          <rect x="380" y="270" width="170" height="60" rx="10" fill="#2A9D8F"/><text x="465" y="296" text-anchor="middle" fill="#fff">Ballot access</text><text x="465" y="314" text-anchor="middle" fill="#eafaf6" font-size="11">(future sprint)</text>
+          <rect x="600" y="270" width="200" height="60" rx="10" fill="#c1666b"/><text x="700" y="296" text-anchor="middle" fill="#fff">Blocked + audio reason</text>
+        </g>
+        <g stroke="#41617a" stroke-width="2" fill="none" marker-end="url(#a5)">
+          <path d="M170,70 H228"/><path d="M370,70 H428"/><path d="M590,70 H648"/>
+          <path d="M725,100 V158"/><path d="M650,190 H655" opacity="0"/><path d="M650,190 H652"/>
+          <path d="M650,190 H472"/><path d="M300,190 H472" opacity="0"/><path d="M300,190 H272"/>
+          <path d="M195,220 V270"/>
+          <path d="M210,330 V335 H380" marker-end="url(#a5)"/>
+          <path d="M300,300 H600" marker-end="url(#a5)"/>
+        </g>
+        <g font-size="11" fill="#c1666b" font-weight="700">
+          <text x="300" y="34">No → error</text>
+          <text x="588" y="150">No → retry</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 15 ELIGIBILITY DECISION -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · US-04</div>
+    <h2>Eligibility decision logic</h2>
+    <div class="two">
+      <table>
+        <thead><tr><th>Condition</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th></tr></thead>
+        <tbody>
+          <tr><td>CNIC verified</td><td>T</td><td>F</td><td>T</td><td>T</td></tr>
+          <tr><td>Registered as disabled</td><td>T</td><td>—</td><td>F</td><td>T</td></tr>
+          <tr><td>Phone verified (OTP)</td><td>T</td><td>—</td><td>—</td><td>F</td></tr>
+          <tr><td><b>Ballot access</b></td><td><b>Yes</b></td><td>No</td><td>No</td><td>No</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <div class="card"><b>Single source of truth</b>
+          <p class="sub"><code>User.is_eligible_to_vote</code> = active · voter · disabled · CNIC verified · phone verified · eligible.</p></div>
+        <div class="card" style="margin-top:.8rem"><b>Enforced by a reusable gate</b>
+          <p class="sub"><code>@eligible_required</code> protects the ballot route — so US-04 holds for every future voting page automatically.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 IMPLEMENTATION -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · Implementation</div>
+    <h2>What we built</h2>
+    <div class="two">
+      <ul>
+        <li><b>Custom user model</b> keyed by CNIC (voter / admin roles).</li>
+        <li><b>Registration</b> with mock CNIC verification &amp; consent.</li>
+        <li><b>CNIC + OTP login</b> — passwordless for voters; OTP expiry &amp; single-use.</li>
+        <li><b>Eligibility gate</b> protecting the ballot route (US-04).</li>
+        <li><b>Swappable services</b> — CNIC verifier &amp; OTP delivery ready for NADRA / SMS.</li>
+        <li><b>Accessible templates</b> — labels, visible focus, skip link, large text.</li>
+      </ul>
+      <div class="card">
+        <div class="kicker">Django structure</div>
+        <p class="sub" style="line-height:1.7">
+          <b>config/</b> — settings, urls<br>
+          <b>accounts/</b> — models · forms · views · decorators<br>
+          &nbsp;&nbsp;<b>services/</b> — cnic_verifier · otp_service<br>
+          <b>templates/</b> — register · verify_otp · login · dashboard<br>
+          <b>static/</b> — accessible CSS
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 TESTING -->
+  <section class="slide">
+    <div class="kicker">Sprint 1 · Quality</div>
+    <h2>Testing</h2>
+    <table>
+      <thead><tr><th>Test</th><th>Scenario</th><th>Expected</th><th>Story</th></tr></thead>
+      <tbody>
+        <tr><td>TC-01</td><td>Register valid CNIC</td><td>Voter created, CNIC verified, pending OTP</td><td>US-01</td></tr>
+        <tr><td>TC-02</td><td>Invalid CNIC format</td><td>Rejected with error</td><td>US-01</td></tr>
+        <tr><td>TC-03</td><td>Correct OTP</td><td>Phone verified, logged in</td><td>US-03</td></tr>
+        <tr><td>TC-04</td><td>Wrong / expired OTP</td><td>Rejected, retry</td><td>US-03</td></tr>
+        <tr><td>TC-05</td><td>Unverified reaches ballot</td><td>Blocked → dashboard</td><td>US-04</td></tr>
+        <tr><td>TC-06</td><td>Verified reaches ballot</td><td>Access granted</td><td>US-04</td></tr>
+      </tbody>
+    </table>
+    <p class="sub">Automated with Django's test runner — <code>python manage.py test</code>.</p>
+  </section>
+
+  <!-- 18 DEMO -->
+  <section class="slide center">
+    <div class="fill center">
+      <div class="kicker">Live Demo</div>
+      <h1 class="title" style="font-size:clamp(24px,4vw,44px)">Let's see it working</h1>
+      <ul style="max-width:620px;text-align:left;margin-top:1.2rem">
+        <li>Register a voter with a 13-digit CNIC.</li>
+        <li>Receive the OTP (shown on screen in dev) and verify.</li>
+        <li>Land on the dashboard — status all green.</li>
+        <li>Open the ballot → eligibility gate lets a verified voter through.</li>
+        <li>Show an unverified account being blocked.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 19 STATUS / NEXT -->
+  <section class="slide">
+    <div class="kicker">Status &amp; Roadmap</div>
+    <h2>Sprint 1 done → Sprint 2 next</h2>
+    <div class="two">
+      <div>
+        <div class="pill">Sprint 1 — delivered</div>
+        <ul>
+          <li>US-01 Registration ✅</li>
+          <li>US-03 CNIC + OTP login ✅</li>
+          <li>US-04 Eligibility gate ✅</li>
+        </ul>
+      </div>
+      <div>
+        <div class="pill" style="background:var(--teal)">Sprint 2 — planned</div>
+        <ul>
+          <li>Live <b>NADRA</b> verification &amp; real SMS OTP.</li>
+          <li><b>Ballot &amp; vote casting</b> (one encrypted vote).</li>
+          <li><b>TTS read-aloud</b> &amp; full keyboard / ARIA.</li>
+          <li>Admin: elections, candidates, voter management.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 THANKS -->
+  <section class="slide titleslide center">
+    <div class="fill center">
+      <div class="kicker">Thank you</div>
+      <h1 class="title">Questions &amp; discussion</h1>
+      <p class="sub" style="color:#dbe9f4;margin-top:1rem">E-Voting System for Blind &amp; Visually Impaired Voters — FYP-I, Sprint 1</p>
+      <span class="badge">Inayat Ullah · Salar Khan · Uzair Shakir — Supervisor: Dr. Amber Sultan</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="foot">
+  <span class="title-mini">E-Voting · Sprint 1 Review</span>
+  <div class="nav">
+    <button id="prev" aria-label="Previous slide">‹ Prev</button>
+    <span class="count"><span id="cur">1</span> / <span id="tot">20</span></span>
+    <button id="next" aria-label="Next slide">Next ›</button>
+  </div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+  const bar = document.getElementById('bar');
+  const cur = document.getElementById('cur');
+  document.getElementById('tot').textContent = slides.length;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=>{ s.classList.toggle('active', k===i); s.setAttribute('aria-hidden', k!==i); });
+    bar.style.width = ((i+1)/slides.length*100)+'%';
+    cur.textContent = i+1;
+  }
+  function next(){ show(i+1); }
+  function prev(){ show(i-1); }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  document.addEventListener('keydown', e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); next(); }
+    else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ show(0); }
+    else if(e.key==='End'){ show(slides.length-1); }
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}else{document.exitFullscreen&&document.exitFullscreen();} }
+  });
+  // basic swipe for touch
+  let sx=null;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{ if(sx==null)return; const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>50){dx<0?next():prev();} sx=null; },{passive:true});
+  show(0);
+</script>
+</body>
+</html>

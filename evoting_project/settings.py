@@ -48,6 +48,8 @@ ASGI_APPLICATION = "evoting_project.asgi.application"
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
+LOGIN_URL = 'login'
+
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"

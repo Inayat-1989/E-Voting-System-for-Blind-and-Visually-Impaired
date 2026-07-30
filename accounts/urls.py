@@ -1,4 +1,5 @@
 from django.urls import path
+from django.urls import include, path
 
 from . import views
 
@@ -7,4 +8,5 @@ urlpatterns = [
     path("login/", views.login_voter, name="login"),
     path("logout/", views.logout_voter, name="logout"),
     path('api/process-speech/', views.process_speech, name='process_speech'),
+    path("voting/", include("voting_app.urls")),
 ]

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<nav>
+    <a href="{% url 'logout' %}">Logout</a>
+  </nav>
+<h2>Available Elections</h2>
+{% if elections %}
+    <div class="grid">
+        {% for election in elections %}
+            <div class="item">
+                <h3>{{ election.title }}</h3>
+                <p class="muted">{{ election.description }}</p>
+                <ul>
+                    {% for candidate in election.candidates.all %}
+                        <li>{{ candidate.name }}</li>
+                    {% endfor %}
+                </ul>
+                <div class="actions"><a href="{% url 'vote' election.id %}">Vote now</a></div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No elections available yet.</p>
+{% endif %}
+{% endblock %}

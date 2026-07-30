@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE|default:'en' }}">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Disabled Voter E-Voting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --card: #fff;
+      --text: #16324f;
+      --muted: #5f7186;
+      --accent: #1f6feb;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #f9fbff, #eef5ff);
+      color: var(--text);
+    }
+
+    .shell {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 14px 40px rgba(16, 24, 40, .08);
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1.3fr .7fr;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-block;
+      background: #e8f1ff;
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+      max-width: 380px;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d9e3f0;
+      font-size: 14px;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .messages {
+      margin-bottom: 18px;
+    }
+
+    .messages div {
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .success {
+      background: #ecfdf3;
+      color: #166534;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: var(--danger);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .item {
+      border: 1px solid #e7edf5;
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .actions a {
+      display: inline-block;
+      margin-right: 10px;
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    @media (max-width: 720px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <!-- <nav> -->
+    <!-- <a href="{% url 'home' %}">Home</a> -->
+    <!-- <a href="{% url 'login' %}">Login</a> -->
+    <!-- <a href="{% url 'elections' %}">Elections</a> -->
+    <!-- <a href="{% url 'logout' %}">Logout</a> -->
+    <!-- </nav> -->
+    <div class="messages">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
+    </div>
+    <div class="card">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  <button id="start-btn">Start Listening</button>
+  <p><strong>Status:</strong> <span id="status">Idle</span></p>
+  <p><strong>Transcript:</strong> <span id="transcript"></span></p>
+  <p><strong>Server Response:</strong> <span id="server-response"></span></p>
+  <script>
+    const startBtn = document.getElementById('start-btn');
+    const statusSpan = document.getElementById('status');
+    const transcriptSpan = document.getElementById('transcript');
+    const serverResponseSpan = document.getElementById('server-response');
+
+    // Check for browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      statusSpan.innerText = "Web Speech API not supported in this browser.";
+      startBtn.disabled = true;
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false; // Stop automatically when user stops speaking
+      recognition.lang = 'en-US';     // Set preferred language
+
+      // Handle start event
+      startBtn.addEventListener('click', (event) => {
+        recognition.start();
+        statusSpan.innerText = "Listening...";
+        transcriptSpan.innerText = "";
+        serverResponseSpan.innerText = "";
+      });
+
+      // Process transcription results
+      recognition.onresult = (event) => {
+        const speechToText = event.results[0][0].transcript;
+        let cleanedText = speechToText.replace(/(?<=\d)\s+(?=\d)/g, ''); // Remove spaces between digits
+        transcriptSpan.innerText = cleanedText;
+        statusSpan.innerText = "Processing on backend...";
+        localStorage.setItem('CNIC', cleanedText); // Store the cleaned text in localStorage
+        window.dispatchEvent(new Event('cnicUpdated')); // Dispatch a custom event to notify other scripts
+        // Send the transcript to Django via a fetch POST request
+        sendToDjango(cleanedText);
+      };
+
+      // Handle errors or natural end
+      recognition.onerror = (event) => {
+        statusSpan.innerText = "Error occurred: " + event.error;
+      };
+
+      recognition.onend = () => {
+        if (statusSpan.innerText === "Listening...") {
+          statusSpan.innerText = "Stopped listening.";
+        }
+      };
+    }
+
+    // Send text data to Django backend
+    function sendToDjango(text) {
+      fetch('/api/process-speech/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add X-CSRFToken if csrf_exempt is removed from view
+        },
+        body: JSON.stringify({ text: text })
+      })
+        .then(response => response.json())
+        .then(data => {
+          statusSpan.innerText = "Done!";
+          serverResponseSpan.innerText = data.message;
+        })
+        .catch(error => {
+          statusSpan.innerText = "Server Error";
+          console.error('Error:', error);
+        });
+    }
+  </script>
+</body>
+
+</html>

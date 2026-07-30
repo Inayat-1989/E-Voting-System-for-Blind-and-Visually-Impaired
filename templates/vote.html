@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Vote for {{ election.title }}</h2>
+{% if not allowed %}
+    <p>Only disabled voters are allowed to vote in this system.</p>
+{% elif submitted %}
+    <p>Your vote was recorded.</p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        {% for candidate in election.candidates.all %}
+            <label class="item">
+                <input type="radio" name="candidate_id" value="{{ candidate.id }}">
+                {{ candidate.name }}
+            </label>
+        {% endfor %}
+        <button type="submit">Submit vote</button>
+    </form>
+{% endif %}
+{% endblock %}

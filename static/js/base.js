@@ -53,13 +53,12 @@ if (!SpeechRecognition) {
     });
 
     recognition.onresult = (event) => {
-        const speechToText = event.results[0][0].transcript;
-        let cleanedText = speechToText.replace(/(?<=\d)\s+(?=\d)/g, '');
-        transcriptSpan.innerText = cleanedText;
+        const speechToText = event.results[0][0].transcript.replace(/\D/g, '').slice(0, 13);
+        transcriptSpan.innerText = speechToText;
         statusSpan.innerText = "Processing on backend...";
-        localStorage.setItem('CNIC', cleanedText);
+        localStorage.setItem('CNIC', speechToText);
         window.dispatchEvent(new Event('cnicUpdated'));
-        sendToDjango(cleanedText);
+        sendToDjango(speechToText);
     };
 
     recognition.onerror = (event) => {

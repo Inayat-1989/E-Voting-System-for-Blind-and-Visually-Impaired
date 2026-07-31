@@ -15,12 +15,6 @@ def elections_list(request):
 
     # .prefetch_related("candidates")
     elections = Election.objects.all()
-    if elections:
-        print("Da ana koas di")
-        for election in elections:
-            print(election.title)
-    else:
-        print("Za was sa wakam")
     return render(request, "voting_app/elections.html", {"elections": elections})
 
 

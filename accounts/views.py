@@ -19,7 +19,7 @@ def login_voter(request):
         request.session["voter_id"] = voter.id
         voter.save()
         messages.success(request, "You are a verified Disabled User. Welcome!")
-        return render(request, "voting_app/elections.html")
+        return redirect("elections")
 
     return render(request, "accounts/login.html")   
 
@@ -43,4 +43,4 @@ def process_speech(request):
 def logout_voter(request):
     request.session.flush()
     messages.success(request, "You have been logged out.")
-    return redirect("accounts/login")
+    return redirect("login")

@@ -11,10 +11,11 @@ from .models import Candidate, Election, Vote, Voter
 def elections_list(request):
     if not request.session.get("voter_id"):
         messages.error(request, "Please log in first.")
-        return redirect("login")
+        return redirect("account/login")
 
-    elections = Election.objects.all().prefetch_related("candidates")
-    return render(request, "elections.html", {"elections": elections})
+    # .prefetch_related("candidates")
+    elections = Election.objects.all()
+    return render(request, "voting_app/elections.html", {"elections": elections})
 
 
 def vote(request, election_id):

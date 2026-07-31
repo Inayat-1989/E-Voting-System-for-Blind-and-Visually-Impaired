@@ -43,4 +43,4 @@ def process_speech(request):
 def logout_voter(request):
     request.session.flush()
     messages.success(request, "You have been logged out.")
-    return redirect("accounts/login")
+    return render(request, "accounts/login.html")

@@ -6,10 +6,11 @@ import json
 from .models import User
 
 # Create your views here.
-def home(request):
-    return render(request, "accounts/login.html")
+# def home(request):
+#     return render(request, "accounts/login.html")
 
 def login_voter(request):
+    render(request, "accounts/login.html")
     if request.method == "POST":
         cnic = request.POST.get("cnic", "").strip()
         voter = User.objects.filter(cnic=cnic).first() #we are going to fetch/comapre the cnic of this post value to the database value.

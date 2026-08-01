@@ -6,6 +6,19 @@ SECRET_KEY = "django-insecure-test-key"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
+STATIC_URL = "static/"
+
+# Add this to look for static files at the project root level
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# Make sure Django's built-in app directory scanner is enabled
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder', # <--- THIS IS REQUIRED TO FIND APP STATIC FOLDERS
+]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

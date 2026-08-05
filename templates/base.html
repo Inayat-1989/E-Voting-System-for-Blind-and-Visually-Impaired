@@ -14,11 +14,7 @@
 </head>
 
 <body>
-  <!-- Keyboard skip target -->
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-
   <div class="shell">
-    <!-- Top Bar containing Global Accessibility Controls -->
     <header class="accessibility-bar" aria-label="Accessibility Toolbar">
       <span>System Access</span>
       <button id="contrast-toggle" aria-label="Toggle High Contrast Mode"
@@ -27,7 +23,7 @@
       </button>
     </header>
 
-    <!-- System Application Notification Messages -->
+
     <div class="messages">
       {% if messages %}
       {% for message in messages %}
@@ -36,7 +32,6 @@
       {% endif %}
     </div>
 
-    <!-- Core Content Container Grid -->
     <main id="main-content" class="card">
       {% block content %}{% endblock %}
     </main>
@@ -61,7 +56,7 @@
         <strong>Server Status:</strong> <span id="server-response">None</span>
       </div>
     </section>
-  </div>  
+  </div>
   <script src="{% static 'js/base.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>

@@ -1,24 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-<h2>Vote for {{ election.title }}</h2>
-{% if not allowed %}
-    <p>Only disabled voters are allowed to vote in this system.</p>
-{% elif submitted %}
-    <p>Your vote was recorded.</p>
-{% else %}
-    <form method="post">
-        {% csrf_token %}
-        {% for candidate in election.candidates.all %}
-            <label class="item">
-                <input type="radio" name="candidate_id" value="{{ candidate.id }}">
-                {{ candidate.name }}
-            </label>
-        {% endfor %}
-        <button type="submit">Submit vote</button>
-    </form>
-{% endif %}
-{% block extra_js %}
-<script src="{% static 'voting_app/js/vote.js' %}"></script>
-{% endblock %}
+<nav>
+    <a href="{% url 'logout' %}">Logout</a>
+</nav>
+<button onclick="history.back()">Go Back </button>
+<h2>Choose your Candidate</h2>
+<form action="{% url 'vote' %}" method="post">
+    {% csrf_token %}
+    {% for candidate in candidates %}
+    <input type="hidden" name="election_id" value="{{ election_id }}">
+    <input type="hidden" name="voter_id" value="{{ voter.id }}">
+    <label class="item">
+        {{ candidate.name }}
+        <input type="radio" name="candidate_id" value="{{ candidate.candidate_id }}">
+    </label>
+    {% endfor %}
+    <button type="submit">Submit vote</button>
+</form>
 {% endblock %}

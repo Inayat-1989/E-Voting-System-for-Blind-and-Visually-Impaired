@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "voting_app",
     "accounts",
+    'view_breadcrumbs',
 ]
 
 MIDDLEWARE = [

@@ -5,7 +5,7 @@
 <nav>
     <a href="{% url 'logout' %}">Logout</a>
 </nav>
-<button onclick="history.back()">Go Back </button>
+<button onclick="history.back()">Go Back</button>
 <h2>Choose your Candidate</h2>
 <form action="{% url 'vote' %}" method="post">
     {% csrf_token %}

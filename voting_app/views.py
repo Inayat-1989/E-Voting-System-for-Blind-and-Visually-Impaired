@@ -20,6 +20,10 @@ def elections_list(request):
 
 def assembly_types(request, title):
     voter = Voter.objects.get(id=request.session.get("voter_id"))
+    if voter.has_voted_na and voter.has_voted_pa:
+        election = Election.objects.first()
+        messages.success(request, "You have voted both votes Successfully!")
+        return render(request, "voting_app/elections.html", {"election": election})
     return render(
         request,
         "voting_app/assembly_types.html",

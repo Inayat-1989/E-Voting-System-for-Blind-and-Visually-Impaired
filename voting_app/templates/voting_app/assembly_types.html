@@ -7,33 +7,27 @@
 </nav>
 <button onclick="history.back()">Go Back </button>
 <h2>{{ election_title }}</h2>
+<div id="user-component" data-has_voted_na="{{ voter.has_voted_na }}" data-has_voted_pa="{{ voter.has_voted_pa }}" data-redirect-url="{% url 'elections' %}"
+    hidden>
+</div>
 {% if voter %}
 <div class="grid">
-    {% if not voter.has_voted_na %}
     <input type="hidden" name="voter_id" value="{{ voter.id }}">
     <div class="item">
         <h3>National Assembly</h3>
-        <div class="actions"><a href="{% url 'candidates' title=election_title assembly='NATIONAL'  %}">Vote now</a>
+        <div id="na_link" class="actions"><a
+                href="{% url 'candidates' title=election_title assembly='NATIONAL'  %}">Vote now</a>
         </div>
     </div>
-    {% else %}
-    <div class="item">
-        <h3>National Assembly</h3>
-    </div>
-    <h3>You have already Voted for This</h3>
-    {% endif %}
-    {% if not voter.has_voted_pa %}
     <div class="item">
         <h3>Provincial Assembly</h3>
-        <div class="actions"><a href="{% url 'candidates' title=election_title assembly='PROVINCIAL' %}">Vote now</a>
+        <div id="pa_link" class="actions"><a
+                href="{% url 'candidates' title=election_title assembly='PROVINCIAL' %}">Vote now</a>
         </div>
     </div>
-    {% else %}
-    <div class="item">
-        <h3>Provincial Assembly</h3>
-    </div>
-    <h3>You have already Voted for This</h3>
-    {% endif %}
 </div>
 {% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'voting_app/js/assembly_types.js' %}"></script>
 {% endblock %}

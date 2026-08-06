@@ -1,14 +1,12 @@
 {% load static %}
 <!doctype html>
-<html lang="{{ request.LANGUAGE_CODE|default:'en' }}">
+<html lang="{{ request.LANGUAGE_CODE|default:'en-US' }}">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/ico" href="{% static 'images/favicon.ico' %}">
   <title>Blind Voter E-Voting</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
@@ -16,9 +14,7 @@
 <body>
   <div class="shell">
     <header class="accessibility-bar" aria-label="Accessibility Toolbar">
-      <span>System Access</span>
-      <button id="contrast-toggle" aria-label="Toggle High Contrast Mode"
-        style="width: auto; min-height: 48px; padding: 10px 20px; font-size: 1rem;">
+      <button id="contrast-toggle" aria-label="Toggle High Contrast Mode">
         Toggle High Contrast
       </button>
     </header>

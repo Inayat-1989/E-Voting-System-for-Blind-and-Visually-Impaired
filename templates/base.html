@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html lang="{{ request.LANGUAGE_CODE|default:'en-US' }}">
+<html lang="{{ request.LANGUAGE_CODE|default:'en' }}">
 
 <head>
   <meta charset="utf-8">
@@ -35,9 +35,8 @@
     <!-- Voice Control Panel Configuration Base Interface -->
     <section class="voice-controls" aria-label="Voice Interface Controls">
       <h2>Voice Command Center</h2>
-      <p style="font-size: 1.1rem; color: var(--muted); margin-bottom: 20px;">Use your voice to securely navigate and
+      <p>Use your voice to securely navigate and
         input credentials.</p>
-
       <button id="start-btn">
         Start Listening
       </button>

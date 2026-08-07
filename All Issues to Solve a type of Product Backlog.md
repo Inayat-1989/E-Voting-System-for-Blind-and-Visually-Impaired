@@ -41,7 +41,7 @@ E5. * When Voter is Prompted with Questions what mode of answer is best? Voice (
 
 Section F: (UI and UI Related Tasks) Tasks and Issues Related to More Better UI, Animations, Grading, Smooth Transitions and Messages.
 F1. * Messages disappear after a specific time interval, and appear and disappear with cool and smooth transitions and a more appealing UI for messages.
-F2. * A more Better UI, Buttons, Colors, Font, Grading if possible, Visually Appealing, Names (what names still figuring out?), and messages (success, error or any other) better everything.
+F2. * A more Better UI, Buttons, Colors, Font, Grading if possible, Visually Appealing, Names of Voter, Candidates, Polling Station, Election , and messages (success, error or any other) better everything.
 F3. * A good transition from one screen to another, each screen transition must be smooth so that it feels good. Not important because blind people, but better for a good presentation.
 F4. * TTS based UI for easy access.
 F5. * A Good Transition from Normal Contrast to High Contrast

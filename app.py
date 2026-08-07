@@ -1,5 +1,6 @@
 import os
 import sqlite3
+
 from flask import Flask, g, redirect, render_template_string, request, session, url_for
 
 app = Flask(__name__)
@@ -91,7 +92,11 @@ def ensure_db():
 def index():
     if "user_id" in session:
         return redirect(url_for("dashboard"))
-    return render_template_string(HTML_TEMPLATE, title="E-Voting System", content="<p>Welcome to the e-voting platform.</p><p><a href='/register'>Register</a> | <a href='/login'>Login</a></p>")
+    return render_template_string(
+        HTML_TEMPLATE,
+        title="E-Voting System",
+        content="<p>Welcome to the e-voting platform.</p><p><a href='/register'>Register</a> | <a href='/login'>Login</a></p>",
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -102,7 +107,9 @@ def register():
         confirm = request.form["confirm_password"]
         role = request.form.get("role", "voter")
         if not username or not password or password != confirm:
-            return render_template_string(HTML_TEMPLATE, title="Register", content="<p>Registration failed. Please check your input.</p>")
+            return render_template_string(
+                HTML_TEMPLATE, title="Register", content="<p>Registration failed. Please check your input.</p>"
+            )
         db = get_db()
         try:
             db.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
@@ -112,7 +119,10 @@ def register():
         session["user_id"] = db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()[0]
         session["role"] = role
         return redirect(url_for("dashboard"))
-    return render_template_string(HTML_TEMPLATE, title="Register", content="""
+    return render_template_string(
+        HTML_TEMPLATE,
+        title="Register",
+        content="""
         <form method='post'>
             <input name='username' placeholder='Username'><br>
             <input name='password' type='password' placeholder='Password'><br>
@@ -123,7 +133,8 @@ def register():
             </select><br>
             <button type='submit'>Register</button>
         </form>
-    """)
+    """,
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -131,19 +142,27 @@ def login():
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"]
-        row = get_db().execute("SELECT id, role FROM users WHERE username = ? AND password = ?", (username, password)).fetchone()
+        row = (
+            get_db()
+            .execute("SELECT id, role FROM users WHERE username = ? AND password = ?", (username, password))
+            .fetchone()
+        )
         if row is None:
             return render_template_string(HTML_TEMPLATE, title="Login", content="<p>Invalid credentials.</p>")
         session["user_id"] = row[0]
         session["role"] = row[1]
         return redirect(url_for("dashboard"))
-    return render_template_string(HTML_TEMPLATE, title="Login", content="""
+    return render_template_string(
+        HTML_TEMPLATE,
+        title="Login",
+        content="""
         <form method='post'>
             <input name='username' placeholder='Username'><br>
             <input name='password' type='password' placeholder='Password'><br>
             <button type='submit'>Login</button>
         </form>
-    """)
+    """,
+    )
 
 
 @app.route("/logout")
@@ -184,9 +203,14 @@ def admin_elections():
         description = request.form["description"].strip()
         candidates_input = request.form["candidates"].strip()
         if not title or not description or not candidates_input:
-            return render_template_string(HTML_TEMPLATE, title="Create Election", content="<p>Please fill out all fields.</p>")
+            return render_template_string(
+                HTML_TEMPLATE, title="Create Election", content="<p>Please fill out all fields.</p>"
+            )
         db = get_db()
-        cur = db.execute("INSERT INTO elections (title, description, created_by) VALUES (?, ?, ?)", (title, description, session["user_id"]))
+        cur = db.execute(
+            "INSERT INTO elections (title, description, created_by) VALUES (?, ?, ?)",
+            (title, description, session["user_id"]),
+        )
         election_id = cur.lastrowid
         for name in [line.strip() for line in candidates_input.splitlines() if line.strip()]:
             db.execute("INSERT INTO candidates (election_id, name) VALUES (?, ?)", (election_id, name))
@@ -216,14 +240,26 @@ def vote(election_id):
         if not candidate_id:
             return render_template_string(HTML_TEMPLATE, title="Vote", content="<p>Please select a candidate.</p>")
         try:
-            db.execute("INSERT INTO votes (election_id, user_id, candidate_id) VALUES (?, ?, ?)", (election_id, session["user_id"], int(candidate_id)))
+            db.execute(
+                "INSERT INTO votes (election_id, user_id, candidate_id) VALUES (?, ?, ?)",
+                (election_id, session["user_id"], int(candidate_id)),
+            )
             db.commit()
         except sqlite3.IntegrityError:
-            return render_template_string(HTML_TEMPLATE, title="Vote", content="<p>You already voted in this election.</p>")
-        return render_template_string(HTML_TEMPLATE, title="Vote", content="<p>Your vote was recorded.</p><p><a href='/results/{}'>View results</a></p>".format(election_id))
+            return render_template_string(
+                HTML_TEMPLATE, title="Vote", content="<p>You already voted in this election.</p>"
+            )
+        return render_template_string(
+            HTML_TEMPLATE,
+            title="Vote",
+            content=f"<p>Your vote was recorded.</p><p><a href='/results/{election_id}'>View results</a></p>",
+        )
 
     candidates = db.execute("SELECT * FROM candidates WHERE election_id = ?", (election_id,)).fetchall()
-    options = "".join(f"<label><input type='radio' name='candidate_id' value='{candidate['id']}'>{candidate['name']}</label><br>" for candidate in candidates)
+    options = "".join(
+        f"<label><input type='radio' name='candidate_id' value='{candidate['id']}'>{candidate['name']}</label><br>"
+        for candidate in candidates
+    )
     content = f"<h2>{election['title']}</h2><p>{election['description']}</p>{options}<button type='submit'>Submit Vote</button>"
     return render_template_string(HTML_TEMPLATE, title="Vote", content=f"<form method='post'>{content}</form>")
 
@@ -237,7 +273,9 @@ def results(election_id):
     candidates = db.execute("SELECT * FROM candidates WHERE election_id = ?", (election_id,)).fetchall()
     lines = [f"<h3>{election['title']}</h3><p>{election['description']}</p>"]
     for candidate in candidates:
-        vote_count = db.execute("SELECT COUNT(*) FROM votes WHERE election_id = ? AND candidate_id = ?", (election_id, candidate["id"])).fetchone()[0]
+        vote_count = db.execute(
+            "SELECT COUNT(*) FROM votes WHERE election_id = ? AND candidate_id = ?", (election_id, candidate["id"])
+        ).fetchone()[0]
         lines.append(f"<p>{candidate['name']}: {vote_count} vote(s)</p>")
     return render_template_string(HTML_TEMPLATE, title="Results", content="".join(lines))
 

@@ -1,4 +1,5 @@
 import datetime
+
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -44,9 +45,7 @@ class Election(models.Model):
     ]
 
     title = models.CharField(max_length=255, default="General Elections Pakistan")
-    election_type = models.CharField(
-        max_length=15, choices=ELECTION_TYPES, default="NATIONAL"
-    )
+    election_type = models.CharField(max_length=15, choices=ELECTION_TYPES, default="NATIONAL")
     start_time = models.DateTimeField(default=get_default_start_time)
     end_time = models.DateTimeField(default=get_default_end_time)
 
@@ -91,13 +90,9 @@ class Election(models.Model):
 class Constituency(models.Model):
     """Represent a defined electoral geographical territory (Halqa)."""
 
-    election = models.ForeignKey(
-        Election, on_delete=models.CASCADE, related_name="constituencies"
-    )
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="constituencies")
     constituency_id = models.CharField(max_length=20, primary_key=True, default="NA-00")
-    province = models.CharField(
-        max_length=30, choices=Province.choices, default=Province.PUNJAB
-    )
+    province = models.CharField(max_length=30, choices=Province.choices, default=Province.PUNJAB)
     assembly_type = models.CharField(
         max_length=20,
         choices=AssemblyType.choices,
@@ -112,18 +107,12 @@ class Constituency(models.Model):
 class Candidate(models.Model):
     """Represents a politician contesting a specific assembly seat."""
 
-    election = models.ForeignKey(
-        Election, on_delete=models.CASCADE, related_name="candidates"
-    )
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="candidates")
     candidate_id = models.CharField(max_length=50, primary_key=True, default="CAND-000")
     name = models.CharField(max_length=255, default="")
     political_party = models.CharField(max_length=100, default="Independent")
-    assigned_symbol = models.ImageField(
-        upload_to="election_symbols/", blank=True, null=True
-    )
-    constituency = models.ForeignKey(
-        Constituency, on_delete=models.CASCADE, related_name="candidates"
-    )
+    assigned_symbol = models.ImageField(upload_to="election_symbols/", blank=True, null=True)
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="candidates")
     assembly_type = models.CharField(
         max_length=20,
         choices=AssemblyType.choices,
@@ -131,22 +120,15 @@ class Candidate(models.Model):
     )
 
     def __str__(self):
-        return (
-            f"{self.name} ({self.political_party}) -"
-            f" {self.constituency.constituency_id}"
-        )
+        return f"{self.name} ({self.political_party}) - {self.constituency.constituency_id}"
 
 
 class BallotBox(models.Model):
     """Secure anonymous tally counter decoupled from Voter records."""
 
-    election = models.ForeignKey(
-        Election, on_delete=models.CASCADE, related_name="ballot_boxes"
-    )
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="ballot_boxes")
     ballot_box_id = models.CharField(max_length=50, primary_key=True, default="BOX-000")
-    constituency = models.ForeignKey(
-        Constituency, on_delete=models.CASCADE, related_name="ballot_boxes"
-    )
+    constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="ballot_boxes")
     assembly_type = models.CharField(
         max_length=20,
         choices=AssemblyType.choices,
@@ -161,21 +143,14 @@ class BallotBox(models.Model):
     total_votes_cast = models.IntegerField(blank=True, null=True, default=0)
 
     def __str__(self):
-        return (
-            f"BallotBox {self.ballot_box_id} for"
-            f" {self.constituency.constituency_id}"
-        )
+        return f"BallotBox {self.ballot_box_id} for {self.constituency.constituency_id}"
 
 
 class PollingStation(models.Model):
     """Represents the physical or localized digital node where votes are cast."""
 
-    election = models.ForeignKey(
-        Election, on_delete=models.CASCADE, related_name="polling_stations"
-    )
-    station_id = models.CharField(
-        max_length=50, primary_key=True, default="STATION-000"
-    )
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="polling_stations")
+    station_id = models.CharField(max_length=50, primary_key=True, default="STATION-000")
     location_name = models.CharField(max_length=255, default="Government Building")
     constituency_na = models.CharField(max_length=20, default="NA-0")
     constituency_pa = models.CharField(max_length=20, default="PA-0")

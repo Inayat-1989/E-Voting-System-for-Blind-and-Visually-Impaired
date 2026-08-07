@@ -1,10 +1,13 @@
-from django.db import transaction
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import BallotBox, Candidate, Election, PollingStation, Constituency
-from accounts.models import Voter
-from .decorators import voter_required
 import re
+
+from django.contrib import messages
+from django.db import transaction
+from django.shortcuts import redirect, render
+
+from accounts.models import Voter
+
+from .decorators import voter_required
+from .models import BallotBox, Candidate, Constituency, Election, PollingStation
 
 
 @voter_required
@@ -39,13 +42,9 @@ def show_candidates(request, title, assembly):
     voter = Voter.objects.get(id=voter_id)
     candidates = None
     if assembly == "NATIONAL":
-        candidates = Candidate.objects.filter(
-            constituency=voter.assigned_constituency_na, assembly_type=assembly
-        )
+        candidates = Candidate.objects.filter(constituency=voter.assigned_constituency_na, assembly_type=assembly)
     elif assembly == "PROVINCIAL":
-        candidates = Candidate.objects.filter(
-            constituency=voter.assigned_constituency_pa, assembly_type=assembly
-        )
+        candidates = Candidate.objects.filter(constituency=voter.assigned_constituency_pa, assembly_type=assembly)
     else:
         messages.error(request, "Invalid Assembly Type")
         return render(request, "voting_app/elections.html")
@@ -76,7 +75,7 @@ def vote_view(request):
     polling_station = None
     constituency = None
     constituency_id = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
-    polling_station, created = PollingStation.objects.get_or_create(
+    polling_station, _created = PollingStation.objects.get_or_create(
         station_id=f"PS-{constituency_id}",
         defaults={
             "election": election,
@@ -89,7 +88,7 @@ def vote_view(request):
     )
     polling_station.save()
     if election_type == "NATIONAL":
-        constituency, created = Constituency.objects.get_or_create(
+        constituency, _created = Constituency.objects.get_or_create(
             constituency_id=voter.assigned_constituency_na,
             defaults={
                 "election": election,
@@ -101,7 +100,7 @@ def vote_view(request):
         )
         voter.has_voted_na = True
     elif election_type == "PROVINCIAL":
-        constituency, created = Constituency.objects.get_or_create(
+        constituency, _created = Constituency.objects.get_or_create(
             constituency_id=voter.assigned_constituency_pa,
             defaults={
                 "election": election,
@@ -115,7 +114,7 @@ def vote_view(request):
     constituency.save()
     voter.save()
     constituency_id = re.sub(r"[^a-zA-Z]", "", constituency.constituency_id)
-    ballot_box, created = BallotBox.objects.get_or_create(
+    ballot_box, _created = BallotBox.objects.get_or_create(
         ballot_box_id=f"BOX-{polling_station.station_id}-{constituency_id}",
         defaults={
             "election": election,

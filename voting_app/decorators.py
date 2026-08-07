@@ -1,6 +1,8 @@
 # voting_app/decorators.py
-from accounts.models import Voter
 from django.shortcuts import redirect
+
+from accounts.models import Voter
+
 
 def voter_required(view_func):
     def wrapper(request, *args, **kwargs):

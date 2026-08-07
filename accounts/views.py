@@ -1,8 +1,10 @@
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
+
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Voter
 
 
@@ -37,9 +39,7 @@ def process_speech(request):
 
             return JsonResponse({"status": "success", "message": response_text})
         except json.JSONDecodeError:
-            return JsonResponse(
-                {"status": "error", "message": "Invalid JSON"}, status=400
-            )
+            return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
     return JsonResponse({"status": "error", "message": "Only POST allowed"}, status=405)
 

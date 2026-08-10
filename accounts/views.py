@@ -24,24 +24,34 @@ def login_voter(request):
 
     return render(request, "accounts/login.html")   
 
-@csrf_exempt # Use proper CSRF tokens in production
+@csrf_exempt
 def process_speech(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             user_text = data.get('text', '')
-            
-            # TODO: Add your custom backend logic here 
-            # (e.g., save to database, run NLP, trigger an action)
-            response_text = f"Backend received your speech: '{user_text}'"
-            
-            return JsonResponse({'status': 'success', 'message': response_text})
+
+            cnic = ''.join(ch for ch in user_text if ch.isdigit())
+
+            print("SPEECH VIEW HIT — raw text:", repr(user_text))      # ← add
+            print("SPEECH VIEW — cleaned cnic:", repr(cnic))           # ← add
+
+            exists = User.objects.filter(cnic=cnic).exists()
+
+            print("SPEECH VIEW — exists:", exists)                     # ← add
+
+            if exists:
+                return JsonResponse({'verified': True, 'message': 'Verified voter'})
+            else:
+                return JsonResponse({'verified': False, 'message': 'No voter found with that CNIC'})
+
         except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
-            
-    return JsonResponse({'status': 'error', 'message': 'Only POST allowed'}, status=405)
+            return JsonResponse({'verified': False, 'message': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'verified': False, 'message': 'Only POST allowed'}, status=405)
 
 def logout_voter(request):
     request.session.flush()
     messages.success(request, "You have been logged out.")
     return redirect("login")
+

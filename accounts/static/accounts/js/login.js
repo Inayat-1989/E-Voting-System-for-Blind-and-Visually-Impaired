@@ -26,3 +26,15 @@ function insertCnicIntoInputField() {
 }
 document.addEventListener('DOMContentLoaded', insertCnicIntoInputField);
 window.addEventListener('cnicUpdated', insertCnicIntoInputField);
+
+function speak(text){
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+}
+
+window.addEventListener('laod', function () {
+    speak("Welcome to the voting system. Please say or type your 13 digit CNIC number.");
+})

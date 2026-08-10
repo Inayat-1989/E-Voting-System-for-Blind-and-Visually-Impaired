@@ -37,7 +37,9 @@ def assembly_types(request, title):
 @voter_required
 def show_candidates(request, title, assembly):
     election = Election.objects.filter(title=title, election_type=assembly).first()
-    print(election)
+    if not election:
+        messages.error(request, "No Elections at this Moment exists!")
+        return render(request, "voting_app/elections.html")
     voter_id = request.session.get("voter_id")
     voter = Voter.objects.get(id=voter_id)
     candidates = None
@@ -48,7 +50,7 @@ def show_candidates(request, title, assembly):
     else:
         messages.error(request, "Invalid Assembly Type")
         return render(request, "voting_app/elections.html")
-    if not candidates:
+    if not candidates.exists():
         messages.error(request, "No such candidates exists!")
         return render(request, "voting_app/elections.html")
     return render(
@@ -70,13 +72,21 @@ def vote_view(request):
     election = Election.objects.get(pk=request.POST.get("election_id"))
     candidate = Candidate.objects.get(candidate_id=request.POST.get("candidate_id"))
     voter = Voter.objects.get(id=request.session.get("voter_id"))
+
+    if voter.DoesNotExist | candidate.DoesNotExist | election.DoesNotExist:
+        messages.error(request, "Can't Vote Error Occured 404!")
+        return render(request, "voting_app/elections.html")
+
     election_type = election.election_type
     ballot_box = None
     polling_station = None
     constituency = None
-    constituency_id = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
+    constituency_id_na = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
+    constituency_id_pa = re.sub(r"[^0-9]", "", voter.assigned_constituency_pa)
+    constituency_id = constituency_id_na + "-" + constituency_id_pa
+
     polling_station, _created = PollingStation.objects.get_or_create(
-        station_id=f"PS-{constituency_id}",
+        station_id=f"PS-{constituency_id_na}-{constituency_id_pa}",
         defaults={
             "election": election,
             "station_id": f"PS-{constituency_id}",
@@ -98,7 +108,6 @@ def vote_view(request):
                 "registered_voters_count": 10,
             },
         )
-        voter.has_voted_na = True
     elif election_type == "PROVINCIAL":
         constituency, _created = Constituency.objects.get_or_create(
             constituency_id=voter.assigned_constituency_pa,
@@ -110,9 +119,7 @@ def vote_view(request):
                 "registered_voters_count": 10,
             },
         )
-        voter.has_voted_pa = True
     constituency.save()
-    voter.save()
     constituency_id = re.sub(r"[^a-zA-Z]", "", constituency.constituency_id)
     ballot_box, _created = BallotBox.objects.get_or_create(
         ballot_box_id=f"BOX-{polling_station.station_id}-{constituency_id}",
@@ -126,8 +133,18 @@ def vote_view(request):
         },
     )
     ballot_box.save()
-    return vote(request, candidate, ballot_box, election)
-
+    is_casted = vote(request, candidate, ballot_box, election)
+    if is_casted:
+        if election_type == "NATIONAL":
+            voter.has_voted_na = True
+        elif election_type == "PROVINCIAL":
+            voter.has_voted_pa = True
+        voter.save()
+        messages.success(request, "Your vote has been Successfully Casted!")
+    else:
+        messages.error(request, "Vote Casting Failed Retry!")
+        return render(request, "voting_app/elections.html", {"election": election})
+    return render(request, "voting_app/elections.html", {"election": election})
 
 def vote(request, candidate, ballot_box, election):
     with transaction.atomic():
@@ -138,4 +155,5 @@ def vote(request, candidate, ballot_box, election):
         ballot_box.total_votes_cast += 1
         ballot_box.save()
         messages.success(request, "Your vote has been Successfully Casted!")
-    return render(request, "voting_app/elections.html", {"election": election})
+        return True
+    return False

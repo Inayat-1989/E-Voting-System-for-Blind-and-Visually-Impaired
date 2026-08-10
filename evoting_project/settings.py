@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "voting_app",
     "accounts",
+    "ecp_admin",
 ]
 
 MIDDLEWARE = [

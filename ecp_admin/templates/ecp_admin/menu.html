@@ -6,20 +6,20 @@
     <a href="{% url 'ecp_logout' %}">Logout</a>
 </nav>
 <p> Admin Panel Menu </p>
-<ol> 
+<ol>
     {% if election %}
     <li style="text-align:center">
         {% if election.is_active %}
-        <h7>{{ election.title }}</h7>
-        <div id="upload_link" class="actions"><a
+        <h7>Active Election: {{ election.title }}</h7>
+        {% comment %} <div id="upload_link" class="actions"><a
             href="{% url 'ecp_election_upload' %}">Upload File</a>
-        </div>
+        </div> {% endcomment %}
         {% else %}
         No Active Elections.
     </li>
     {% endif %}
     {% endif %}
-    <li><div id="create_election" class="actions"><a href="{% url 'ecp_election_creation_form' %}">Create Election</a></div></li>
+    <li><div id="create_election" class="actions"><a href="{% url 'ecp_election_creation_form' %}">Create New Election</a></div></li>
     <li><div id="create_report" class="actions"><a href="{% url 'ecp_logout' %}">View Report</a></div></li>
 </ol>
 {% endblock %}

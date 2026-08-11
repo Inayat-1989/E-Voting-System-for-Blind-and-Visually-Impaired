@@ -46,7 +46,7 @@ class Election(models.Model):
 
     title = models.CharField(max_length=255, default="General Elections Pakistan")
     election_type = models.CharField(max_length=15, choices=ELECTION_TYPES, default="NATIONAL")
-    start_time = models.DateTimeField(default=get_default_start_time)
+    start_time = models.DateTimeField(default=timezone.now, editable=True)
     end_time = models.DateTimeField(default=get_default_end_time)
 
     def __str__(self):

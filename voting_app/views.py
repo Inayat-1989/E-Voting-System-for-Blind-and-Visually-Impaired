@@ -67,13 +67,13 @@ def vote_view(request):
     and secure vote recording for the logged-in voter.
     """
     if request.method != "POST":
-        messages.error("Method is not POST!")
+        messages.error(request, "Method is not POST!")
         return render(request, "voting_app/elections.html")
-    election = Election.objects.get(pk=request.POST.get("election_id"))
-    candidate = Candidate.objects.get(candidate_id=request.POST.get("candidate_id"))
-    voter = Voter.objects.get(id=request.session.get("voter_id"))
-
-    if voter.DoesNotExist | candidate.DoesNotExist | election.DoesNotExist:
+    try:
+        election = Election.objects.get(pk=request.POST.get("election_id"))
+        candidate = Candidate.objects.get(candidate_id=request.POST.get("candidate_id"))
+        voter = Voter.objects.get(id=request.session.get("voter_id"))
+    except (Election.DoesNotExist, Candidate.DoesNotExist, Voter.DoesNotExist):
         messages.error(request, "Can't Vote Error Occured 404!")
         return render(request, "voting_app/elections.html")
 
@@ -145,6 +145,7 @@ def vote_view(request):
         messages.error(request, "Vote Casting Failed Retry!")
         return render(request, "voting_app/elections.html", {"election": election})
     return render(request, "voting_app/elections.html", {"election": election})
+
 
 def vote(request, candidate, ballot_box, election):
     with transaction.atomic():

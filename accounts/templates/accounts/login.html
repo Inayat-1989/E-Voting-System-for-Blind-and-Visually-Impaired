@@ -7,7 +7,7 @@
 <form method="post" action="{% url 'login' %}">
     {% csrf_token %}
     <label>CNIC
-        <input name="cnic" id="cnic" placeholder="xxxxxxxxxxxxx" type="text" required maxlength="13" inputmode="numeric"
+        <input name="cnic" id="cnic" placeholder="xxxxxxxxxxxxx" type="text" required maxlength="13" inputmode="numeric" autofocus
             pattern="[0-9]{13}">
     </label>
     <button type="submit">Log In</button>

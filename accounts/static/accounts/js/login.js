@@ -1,6 +1,5 @@
 function insertCnicIntoInputField() {
     const cnicField = document.getElementById('cnic');
-    document.addEventListener("DOMContentLoaded", cnicField.focus())
     if (cnicField) {
         const storedCnic = localStorage.getItem('CNIC');
 

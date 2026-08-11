@@ -2,34 +2,62 @@ import csv
 import io
 
 from django.contrib import messages
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from accounts.models import Voter
 from voting_app.models import BallotBox, Candidate, Constituency, Election, PollingStation
 
-from .forms import ECPBulkUploadForm
+from .forms import ECPBulkUploadForm, ElectionForm
+
+User = get_user_model()
+
+
+def ecp_dashboard(request):
+    return render(request, "ecp_admin/login.html")
 
 
 def ecp_login(request):
-    return render(request, "ecp_admin/admin_panel_login.html")
+    if request.user.is_authenticated and request.user.is_staff:
+        election = Election.objects.first()
+        return render(request, "ecp_admin/menu.html", {"election": election})
+    if request.method == "POST":
+        username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        ecp_admin = authenticate(request, username=username, password=password)
+        if not ecp_admin:
+            messages.error(request, "No ECP Admin found with that Username and Password.")
+            return render(request, "ecp_admin/login.html")
+        login(request, ecp_admin)
+        ecp_admin.current_session_key = request.session.session_key
+        ecp_admin.save()
+        messages.success(request, "Welcome ECP Admin!")
+        election = Election.objects.first()
+        return render(request, "ecp_admin/menu.html", {"election": election})
+    return render(request, "ecp_admin/login.html")
+
+
+def ecp_election_creation_form(request):
+    form = ElectionForm()
+    return render(request, "ecp_admin/election.html", {"form": form})
+
+
+def ecp_election_upload(request):
+    if request.method == "POST":
+        form = ElectionForm(request.POST)
+        if form.is_valid():
+            election = form.save()
+    return redirect("ecp_upload_csv_step2", election_id=election.pk)
 
 
 # @staff_member_required(login_url="/login/")
-def ecp_dashboard(request):
+def ecp_election_creation(request):
     if request.method == "POST":
-        ecp_admin = authenticate(request, username=request.POST.get("username"), password=request.POST.get("password"))
-        if ecp_admin is not None:
-            # Successful authentication
-            messages.success(request, f"Welcome, {ecp_admin.username}! You have successfully logged in.")
-            return render(request, "ecp_admin/admin_panel_menu.html")
-    return render(request, "accounts/login.html")
-
-
-# @staff_member_required(login_url="/login/")
-def election_creation(request):
-    if request.method == "POST":
+        form = ElectionForm(request.POST)
+        if form.is_valid():
+            election = form.save()
+            return redirect("ecp_admin/election.html", {"form": form})
         election = Election.objects.get_or_create(
             title=request.POST.get("title", "General Elections Pakistan"),
             election_type=request.POST.get("election_type", "NATIONAL"),
@@ -40,7 +68,7 @@ def election_creation(request):
 
 
 # @staff_member_required(login_url="/login/")
-def upload_election_data(request):
+def ecp_upload_data(request):
     election = Election.objects.first()
     if request.method == "POST":
         form = ECPBulkUploadForm(request.POST, request.FILES)
@@ -132,3 +160,12 @@ def upload_election_data(request):
         form = ECPBulkUploadForm()
 
     return render(request, "ecp_admin/upload.html", {"form": form})
+
+
+def ecp_logout(request):
+    if request.user.is_authenticated:
+        request.user.current_session_key = None
+        request.user.save()
+    logout(request)
+    messages.success(request, "You have been logged out!")
+    return redirect("ecp_login")

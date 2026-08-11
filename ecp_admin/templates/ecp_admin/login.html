@@ -4,10 +4,10 @@
 {% block content %}
 <h2>ECP Admin Sign In</h2>
 <p class="muted">Enter your Username and Password to Login.</p>
-<form method="post" action="{% url 'ecp_dashboard' %}">
+<form method="post" action="{% url 'ecp_login' %}">
     {% csrf_token %}
     <label>Username
-        <input name="username" id="username" placeholder="Enter your username" type="text" required>
+        <input name="username" id="username" placeholder="Enter your username" type="text" autofocus required>
     </label>
     <label>Password
         <input name="password" id="password" placeholder="Enter your password" type="password" required>
@@ -15,8 +15,4 @@
     </label>
     <button type="submit">Log In</button>
 </form>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'ecp_admin/static/js/ecp_admin_login.js' %}"></script>
 {% endblock %}

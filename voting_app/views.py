@@ -36,7 +36,7 @@ def assembly_types(request, title):
 
 @voter_required
 def show_candidates(request, title, assembly):
-    election = Election.objects.filter(title=title, election_type=assembly).first()
+    election = Election.objects.filter(title=title).first()
     if not election:
         messages.error(request, "No Elections at this Moment exists!")
         return render(request, "voting_app/elections.html")
@@ -77,48 +77,61 @@ def vote_view(request):
         messages.error(request, "Can't Vote Error Occured 404!")
         return render(request, "voting_app/elections.html")
 
-    election_type = election.election_type
+    # election_type = election.election_type
+    election_type = candidate.assembly_type
     ballot_box = None
     polling_station = None
     constituency = None
-    constituency_id_na = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
-    constituency_id_pa = re.sub(r"[^0-9]", "", voter.assigned_constituency_pa)
+    constituency_id_na = voter.assigned_constituency_na
+    constituency_id_pa = voter.assigned_constituency_pa
+    # constituency_id_na = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
+    # constituency_id_pa = re.sub(r"[^0-9]", "", voter.assigned_constituency_pa)
     constituency_id = constituency_id_na + "-" + constituency_id_pa
 
     polling_station, _created = PollingStation.objects.get_or_create(
-        station_id=f"PS-{constituency_id_na}-{constituency_id_pa}",
+        station_id=f"PS-{constituency_id}",
         defaults={
             "election": election,
             "station_id": f"PS-{constituency_id}",
             "location_name": "Government Building",
-            "constituency_na": voter.assigned_constituency_na,
-            "constituency_pa": voter.assigned_constituency_pa,
+            "constituency_na": constituency_id_na,
+            "constituency_pa": constituency_id_pa,
             "is_connected_to_central_server": True,
         },
     )
     polling_station.save()
-    if election_type == "NATIONAL":
-        constituency, _created = Constituency.objects.get_or_create(
-            constituency_id=voter.assigned_constituency_na,
-            defaults={
-                "election": election,
-                "constituency_id": voter.assigned_constituency_na,
-                "province": "Punjab",  # Voter specified Province
-                "assembly_type": election_type,
-                "registered_voters_count": 10,
-            },
-        )
-    elif election_type == "PROVINCIAL":
-        constituency, _created = Constituency.objects.get_or_create(
-            constituency_id=voter.assigned_constituency_pa,
-            defaults={
-                "election": election,
-                "constituency_id": voter.assigned_constituency_pa,
-                "province": "Punjab",  # Voter specified Province
-                "assembly_type": election_type,
-                "registered_voters_count": 10,
-            },
-        )
+    constituency, _created = Constituency.objects.get_or_create(
+        constituency_id=candidate.constituency,
+        defaults={
+            "election": election,
+            "constituency_id": candidate.constituency,
+            "province": "Punjab",  # Voter specified Province
+            "assembly_type": election_type,
+            "registered_voters_count": 10,  # later as voter is added registered count increase
+        },
+    )
+    # if election.is_NA:
+    #     constituency, _created = Constituency.objects.get_or_create(
+    #         constituency_id=voter.assigned_constituency_na,
+    #         defaults={
+    #             "election": election,
+    #             "constituency_id": voter.assigned_constituency_na,
+    #             "province": "Punjab",  # Voter specified Province
+    #             "assembly_type": "NATIONAL",
+    #             "registered_voters_count": 10,
+    #         },
+    #     )
+    # if election.is_PA:
+    #     constituency, _created = Constituency.objects.get_or_create(
+    #         constituency_id=voter.assigned_constituency_pa,
+    #         defaults={
+    #             "election": election,
+    #             "constituency_id": voter.assigned_constituency_pa,
+    #             "province": "Punjab",  # Voter specified Province
+    #             "assembly_type": "PROVINCIAL",
+    #             "registered_voters_count": 10,
+    #         },
+    #     )
     constituency.save()
     constituency_id = re.sub(r"[^a-zA-Z]", "", constituency.constituency_id)
     ballot_box, _created = BallotBox.objects.get_or_create(

@@ -1,4 +1,68 @@
-<nav>
-    <a href="{% url 'ecp_logout' %}">Logout</a>
-</nav>
-<button onclick="history.back()">Go Back </button>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="shell">
+    <nav aria-label="Main Navigation">
+        <a href="{% url 'ecp_logout' %}">Logout</a>
+    </nav>
+    
+    <button onclick="history.back()" class="btn">Go Back</button>
+
+    <!-- Main Content Form Section -->
+    <main id="main-content">
+        <h1>ECP Bulk Upload</h1>
+        
+        <form  action="{% url 'ecp_election_data' %}" method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            <!-- Global Form Errors Notification Box -->
+            {% if form.errors %}
+                <div class="messages" role="alert">
+                    <div class="error">
+                        <strong>Please resolve the formatting errors listed below before continuing.</strong>
+                        {{ form.non_field_errors }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Polling Stations File Field -->
+            <div class="item">
+                <label for="{{ form.polling_stations_file.id_for_label }}">
+                    {{ form.polling_stations_file.label }}
+                </label>
+                {{ form.polling_stations_file }}
+                {% if form.polling_stations_file.errors %}
+                    <div class="messages"><div class="error">{{ form.polling_stations_file.errors.as_text }}</div></div>
+                {% endif %}
+            </div>
+
+            <!-- Candidates File Field -->
+            <div class="item">
+                <label for="{{ form.candidates_file.id_for_label }}">
+                    {{ form.candidates_file.label }}
+                </label>
+                {{ form.candidates_file }}
+                {% if form.candidates_file.errors %}
+                    <div class="messages"><div class="error">{{ form.candidates_file.errors.as_text }}</div></div>
+                {% endif %}
+            </div>
+
+            <!-- Voters File Field -->
+            <div class="item">
+                <label for="{{ form.voters_file.id_for_label }}">
+                    {{ form.voters_file.label }}
+                </label>
+                {{ form.voters_file }}
+                {% if form.voters_file.errors %}
+                    <div class="messages"><div class="error">{{ form.voters_file.errors.as_text }}</div></div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Action -->
+            <input type="submit" value="Upload Data Files">
+        </form>
+    </main>
+</div>
+{% endblock %}

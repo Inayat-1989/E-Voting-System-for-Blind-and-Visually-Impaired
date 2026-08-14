@@ -47,115 +47,153 @@ def ecp_election_upload(request):
     if request.method == "POST":
         form = ElectionForm(request.POST)
         if form.is_valid():
-            election = form.save()
-    return redirect("ecp_upload_csv_step2", election_id=election.pk)
+            Election.objects.all().delete()
+            Voter.objects.all().delete()
+            Constituency.objects.all().delete()
+            Candidate.objects.all().delete()
+            PollingStation.objects.all().delete()
+            BallotBox.objects.all().delete()
+            form.save()
+            # Need to check if the same name election already exists would also have to check for national and provincial altogether to avoid issues
+            messages.success(request, "Election was created Successfully, Upload the Files Now!")
+            upload_form = ECPBulkUploadForm()
+            return render(request, "ecp_admin/upload.html", {"form": upload_form})
+        messages.error(request, "Form is not Valid, Please recreate Election.")
+    return render(request, "ecp_admin/election.html")
 
 
 # @staff_member_required(login_url="/login/")
-def ecp_election_creation(request):
-    if request.method == "POST":
-        form = ElectionForm(request.POST)
-        if form.is_valid():
-            election = form.save()
-            return redirect("ecp_admin/election.html", {"form": form})
-        election = Election.objects.get_or_create(
-            title=request.POST.get("title", "General Elections Pakistan"),
-            election_type=request.POST.get("election_type", "NATIONAL"),
-            start_time=request.POST.get("start_time"),
-            end_time=request.POST.get("end_time"),
-        )
-    return render(request, "ecp_admin/admin_panel_upload.html", {"election": election})
-
-
-# @staff_member_required(login_url="/login/")
-def ecp_upload_data(request):
+def ecp_election_data(request):
     election = Election.objects.first()
+    if not election:
+        messages.error(request, "Error: You must configure an Election instance before uploading data files.")
+        return redirect("ecp_admin/login")  # Update with your actual fallback URL name
+
     if request.method == "POST":
         form = ECPBulkUploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # --- 1. PROCESS POLLING STATIONS & AUTO-CREATE BALLOT BOXES ---
-                    station_file = request.FILES["polling_stations_file"]
-                    # Decode byte stream to text for CSV parser
-                    station_data = csv.reader(io.StringIO(station_file.read().decode("utf-8")))
-                    next(station_data)  # Skip header row ['name', 'constituency_code', 'election_id']
+                    # --- 1. PROCESS VOTERS ---
+                    voter_file = request.FILES["voters_file"]
+                    voter_data = csv.reader(io.StringIO(voter_file.read().decode("utf-8")))
+                    next(voter_data)  # Skip header
 
-                    for row in station_data:
-                        polling_station = PollingStation.objects.create(
-                            election=election,
-                            station_id=f"PS-{row[0]}",
-                            location_name=row[1],
-                            constituency_na=row[2],
-                            constituency_pa=row[3],
+                    for row in voter_data:
+                        voter, _ = Voter.objects.get_or_create(
+                            cnic=row[0],
+                            defaults={
+                                "cnic": row[0],
+                                "full_name": row[1],
+                                "assigned_constituency_na": row[5],
+                                "assigned_constituency_pa": row[6],
+                                "is_biometrically_verified": True,
+                            },
                         )
-                        # Automate Dependent Model Insertion: Create the 2 required ballot boxes
-                        BallotBox.objects.create(
-                            election=election,
-                            ballot_box_id=f"BOX-{polling_station.station_id}-NA",
-                            constituency=row[0][0:2],
-                            assembly_type="NATIONAL",
-                            vote_tallies={},
-                            total_votes_cast=0,
+                        constituency_obj, _ = Constituency.objects.get_or_create(
+                            constituency_id=row[5],
+                            defaults={
+                                "election": election,
+                                "province": row[3],
+                                "assembly_type": "NATIONAL",
+                                "registered_voters_count": 0,
+                            },
                         )
-                        BallotBox.objects.create(
-                            election=election,
-                            ballot_box_id=f"BOX-{polling_station.station_id}-PA",
-                            constituency=row[0][3:],
-                            assembly_type="PROVINCIAL",
-                            vote_tallies={},
-                            total_votes_cast=0,
+                        constituency_obj, _ = Constituency.objects.get_or_create(
+                            constituency_id=row[6],
+                            defaults={
+                                "election": election,
+                                "province": row[3],
+                                "assembly_type": "PROVINCIAL",
+                                "registered_voters_count": 0,
+                            },
                         )
+
+                    all_constituencies = Constituency.objects.all()
+
+                    for constituency in all_constituencies:
+                        if constituency.assembly_type == "NATIONAL":
+                            registered_voters_count = Voter.objects.filter(
+                                assigned_constituency_na=constituency.constituency_id
+                            ).count()
+                        elif constituency.assembly_type == "PROVINCIAL":
+                            registered_voters_count = Voter.objects.filter(
+                                assigned_constituency_pa=constituency.constituency_id
+                            ).count()
+                        constituency.registered_voters_count = registered_voters_count
+                        constituency.save()
 
                     # --- 2. PROCESS CANDIDATES & AUTO-CREATE CONSTITUENCIES ---
                     candidate_file = request.FILES["candidates_file"]
                     candidate_data = csv.reader(io.StringIO(candidate_file.read().decode("utf-8")))
-                    next(
-                        candidate_data
-                    )  # Skip header row ['name', 'party', 'constituency_code', 'election_id', 'assembly']
+                    next(candidate_data)  # Skip header
 
                     for row in candidate_data:
-                        # Auto-create the constituency object if it does not exist yet
-                        constituency_obj, _ = Constituency.objects.get_or_create(
-                            constituency_id=row[5],
-                            default={
+                        constituency_obj = Constituency.objects.get(constituency_id=row[6])
+                        if constituency_obj:
+                            candidate, _ = Candidate.objects.get_or_create(
+                                candidate_id=f"CAND-{row[0]}",
+                                assembly_type=row[5],
+                                defaults={
+                                    "election": election,
+                                    "candidate_id": f"CAND-{row[0]}",
+                                    "name": row[1],
+                                    "political_party": row[2],
+                                    "constituency": constituency_obj,
+                                    "assembly_type": row[5],
+                                },
+                            )
+
+                    # --- 3. PROCESS POLLING STATIONS & AUTO-CREATE BALLOT BOXES ---
+                    station_file = request.FILES["polling_stations_file"]
+                    station_data = csv.reader(io.StringIO(station_file.read().decode("utf-8")))
+                    next(station_data)  # Skip header
+
+                    for row in station_data:
+                        constituency_na = Constituency.objects.get(constituency_id=row[3])
+                        constituency_pa = Constituency.objects.get(constituency_id=row[4])
+                        polling_station, _ = PollingStation.objects.get_or_create(
+                            station_id=f"PS-{row[3]}-{row[4]}",
+                            defaults={
                                 "election": election,
-                                "constituency_id": row[5],
-                                "province": row[3],
-                                "assembly_type": row[4],
-                                "registered_voters_count": 0,
+                                "station_id": f"PS-{row[3]}-{row[4]}",
+                                "location_name": row[0],
+                                "constituency_na": row[3],
+                                "constituency_pa": row[4],
                             },
                         )
-                        Candidate.objects.create(
-                            election=election,
-                            candidate_id=f"CAND-{row[0]}",
-                            name=row[1],
-                            political_party=row[2],
-                            constituency=constituency_obj,
-                            assembly_type=row[4],
-                        )
 
-                    # --- 3. PROCESS VOTERS ---
-                    voter_file = request.FILES["voters_file"]
-                    voter_data = csv.reader(io.StringIO(voter_file.read().decode("utf-8")))
-                    next(
-                        voter_data
-                    )  # Skip header row ['cnic', 'name', 'assigned_constituency_na', 'assigned_constituency_pa']
+                        # Create NA Ballot Box
+                        if constituency_na:
+                            ballot_box, _ = BallotBox.objects.get_or_create(
+                                ballot_box_id=f"BOX-{polling_station.station_id}-NA",
+                                defaults={
+                                    "election": election,
+                                    "ballot_box_id": f"BOX-{polling_station.station_id}-NA",
+                                    "constituency": constituency_na,
+                                    "assembly_type": "NATIONAL",
+                                    "vote_tallies": {},
+                                    "total_votes_cast": 0,
+                                },
+                            )
 
-                    for row in voter_data:
-                        Voter.objects.create(
-                            cnic=row[0],
-                            full_name=row[1],
-                            assigned_constituency_na=row[2],
-                            assigned_constituency_pa=row[3],
-                            is_biometrically_verified=True,
-                        )
-
+                        # Create PA Ballot Box
+                        if constituency_pa:
+                            ballot_box, _ = BallotBox.objects.get_or_create(
+                                ballot_box_id=f"BOX-{polling_station.station_id}-PA",
+                                defaults={
+                                    "election": election,
+                                    "ballot_box_id": f"BOX-{polling_station.station_id}-PA",
+                                    "constituency": constituency_pa,
+                                    "assembly_type": "PROVINCIAL",
+                                    "vote_tallies": {},
+                                    "total_votes_cast": 0,
+                                },
+                            )
                 messages.success(request, "All systems integrated successfully! Database updated.")
-                return render(request, "ecp_admin/admin_panel_menu.html")
-
-            except Exception as e:  # noqa: BLE001
-                messages.error(request, f"Database insertion aborted! Formatting error detected: {e}")
+                return redirect("../login/")  # Use redirect instead of render for PRG pattern
+            except Exception as e:
+                messages.error(request, f"Database insertion aborted! Formatting or index error detected: {e}")
     else:
         form = ECPBulkUploadForm()
 

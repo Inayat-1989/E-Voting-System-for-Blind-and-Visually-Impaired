@@ -14,18 +14,6 @@ def get_default_end_time():
     return get_default_start_time() + relativedelta(years=5)
 
 
-# --- ENUMS ---
-class Province(models.TextChoices):
-    PUNJAB = "PUNJAB", "Punjab"
-    SINDH = "SINDH", "Sindh"
-    KHYBER_PAKHTUNKHWA = (
-        "KHYBER_PAKHTUNKHWA",
-        "Khyber Pakhtunkhwa",
-    )
-    BALOCHISTAN = "BALOCHISTAN", "Balochistan"
-    ISLAMABAD_CAPITAL = "ISLAMABAD_CAPITAL", "Islamabad Capital Territory"
-
-
 class AssemblyType(models.TextChoices):
     NATIONAL_ASSEMBLY = "NATIONAL", "National Assembly"
     PROVINCIAL_ASSEMBLY = "PROVINCIAL", "Provincial Assembly"
@@ -46,11 +34,19 @@ class Election(models.Model):
 
     title = models.CharField(max_length=255, default="General Elections Pakistan")
     election_type = models.CharField(max_length=15, choices=ELECTION_TYPES, default="NATIONAL")
+    is_NA = models.BooleanField(default=True)
+    is_PA = models.BooleanField(default=True)
     start_time = models.DateTimeField(default=timezone.now, editable=True)
     end_time = models.DateTimeField(default=get_default_end_time)
 
     def __str__(self):
-        return f"{self.title} ({self.get_election_type_display()})"
+        active_types = []
+        if self.is_NA:
+            active_types.append("National")
+        if self.is_PA:
+            active_types.append("Provincial")
+        types_str = " & ".join(active_types) if active_types else "None"
+        return f"{self.title} ({types_str})"
 
     @property
     def is_active(self):
@@ -69,8 +65,22 @@ class Election(models.Model):
             raise ValidationError("End time must be later than the start time.")
 
     def save(self, *args, **kwargs):
+        self.pk = 1
         self.full_clean()
         super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _created = cls.objects.get_or_create(
+            pk=1,
+            defaults={
+                "title": "Default Election",
+                "election_type": "General",
+                "start_time": timezone.now(),
+                "end_time": timezone.now(),
+            },
+        )
+        return obj
 
     def fetch_election_infrastructure(self):
         """Fetches non-sensitive operational infrastructure required for voting:
@@ -92,7 +102,7 @@ class Constituency(models.Model):
 
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="constituencies")
     constituency_id = models.CharField(max_length=20, primary_key=True, default="NA-00")
-    province = models.CharField(max_length=30, choices=Province.choices, default=Province.PUNJAB)
+    province = models.CharField(max_length=255, default="Punjab")
     assembly_type = models.CharField(
         max_length=20,
         choices=AssemblyType.choices,
@@ -108,7 +118,7 @@ class Candidate(models.Model):
     """Represents a politician contesting a specific assembly seat."""
 
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="candidates")
-    candidate_id = models.CharField(max_length=50, primary_key=True, default="CAND-000")
+    candidate_id = models.CharField(max_length=50, default="CAND-000")
     name = models.CharField(max_length=255, default="")
     political_party = models.CharField(max_length=100, default="Independent")
     assigned_symbol = models.ImageField(upload_to="election_symbols/", blank=True, null=True)

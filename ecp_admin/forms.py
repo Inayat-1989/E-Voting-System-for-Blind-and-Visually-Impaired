@@ -1,5 +1,5 @@
-# ecp_admin/forms.py
 from django import forms
+from django.utils import timezone
 
 from voting_app.models import Election
 
@@ -13,14 +13,22 @@ class ECPBulkUploadForm(forms.Form):
 
 
 class ElectionForm(forms.ModelForm):
+    election_type = forms.MultipleChoiceField(
+        choices=[
+            ("NATIONAL", "National Assembly"),
+            ("PROVINCIAL", "Provincial Assembly"),
+        ],
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
     class Meta:
         model = Election
-        fields = ["title", "election_type", "start_time", "end_time"]
+        fields = ["title", "start_time", "end_time"]
 
         # Adding clear labels and visual placeholders/widgets
         labels = {
             "title": "Election Title",
-            "election_type": "Assembly Type",
             "start_time": "Voting Start Time",
             "end_time": "Voting End Time",
         }
@@ -29,7 +37,6 @@ class ElectionForm(forms.ModelForm):
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "e.g., General Elections Pakistan"}
             ),
-            "election_type": forms.Select(attrs={"class": "form-select"}),
             "start_time": forms.DateTimeInput(
                 attrs={
                     "class": "form-control",
@@ -38,6 +45,24 @@ class ElectionForm(forms.ModelForm):
             ),
             "end_time": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
         }
+
+    def __init__(self, *args, **kwargs):  # noqa: D107
+        super().__init__(*args, **kwargs)
+        self.fields["title"].initial = None
+        local_now = timezone.localtime(timezone.now())
+        self.fields["start_time"].initial = local_now
+        self.fields["end_time"].initial = local_now + timezone.timedelta(days=1)
+
+        # Explicitly restore initial checkbox state if it's a new form
+        if self.instance and self.instance.pk:
+            initial_checks = []
+            if self.instance.is_NA:
+                initial_checks.append("NATIONAL")
+            if self.instance.is_PA:
+                initial_checks.append("PROVINCIAL")
+            self.fields["election_type"].initial = initial_checks
+        elif not self.is_bound:
+            self.fields["election_type"].initial = ["NATIONAL", "PROVINCIAL"]
 
     def clean(self):
         """Cross-field validation hook.
@@ -54,3 +79,18 @@ class ElectionForm(forms.ModelForm):
             self.add_error("end_time", "End time must be later than the start time.")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        # Generate instance object without executing immediate SQL write operations
+        instance = super().save(commit=False)
+
+        # Parse user checkbox list entries
+        selected_types = self.cleaned_data.get("election_type", [])
+
+        # Explicitly map checked lists back to individual database Boolean values
+        instance.is_NA = "NATIONAL" in selected_types
+        instance.is_PA = "PROVINCIAL" in selected_types
+
+        if commit:
+            instance.save()
+        return instance

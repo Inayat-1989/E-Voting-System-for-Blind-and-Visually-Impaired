@@ -52,7 +52,8 @@ if (!SpeechRecognition) {
     startBtn.disabled = true;
 } else {
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
+    recognition.interimResults = false;
     recognition.lang = 'en-US';
 
     let step = 'ask_signin';
@@ -62,6 +63,21 @@ if (!SpeechRecognition) {
     const MAX_CNIC_TRIES = 3;              // NEW: limit before giving up
     let pendingCnic = '';
     let started = false;
+
+    // Helper function to safely process transcripts
+    function cleanTranscript(rawText) {
+        // Remove punctuation and extra whitespace
+        return rawText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
+    }
+
+    function stopAndReset(message) {
+        speak(message);
+        started = false;
+        silentTries = 0;
+        cnicTries = 0;
+        step = 'ask_signin';
+        statusSpan.innerText = "Waiting. Press any key to start again.";
+    }
 
     function listen() {
         statusSpan.innerText = "Listening...";
@@ -85,38 +101,72 @@ if (!SpeechRecognition) {
     }
 
     recognition.onresult = (event) => {
-        console.log("RAW HEARD:", event.results[0][0].transcript, "| step:", step);
-        const heard = event.results[0][0].transcript.toLowerCase().trim();
-        transcriptSpan.innerText = heard;
-        statusSpan.innerText = "Heard you.";
-        silentTries = 0;
+    // Grab the latest result index
+    const resultIndex = event.resultIndex;
+    const heardRaw = event.results[resultIndex][0].transcript;
+    const heard = cleanTranscript(heardRaw);
+    
+    console.log("RAW HEARD:", heardRaw, "| CLEANED:", heard, "| step:", step);
+    
+    transcriptSpan.innerText = heard;
+    statusSpan.innerText = "Heard you.";
+    silentTries = 0;
+
+    // Stop recognition manually before playing TTS so TTS doesn't feed back into mic
+    recognition.stop();
+
+        // Word boundary / intent extraction helpers
+        const words = heard.split(/\s+/);
+        const saidYes = words.includes('yes') || words.includes('okay') || words.includes('ok') || heard.includes('i want');
+        const saidNo = words.includes('no') || words.includes('stop') || words.includes('cancel') || heard.includes("don't");
 
         if (step === 'ask_signin') {
-            const saidYes = heard.includes('yes') || heard.includes('okay') ||
-                            heard.includes('ok') || heard.includes('i want');
             if (saidYes) {
+                cnicTries = 0;
                 askCnic();
+            } else if (saidNo) {
+                stopAndReset("Okay, signing in canceled. Press any key whenever you are ready.");
             } else {
-                askSignIn();
+                silentTries++;
+                if (silentTries >= MAX_SILENT_TRIES) {
+                    stopAndReset("I did not understand your response. Press any key to start again.");
+                } else {
+                    askSignIn();
+                }
             }
         }
         else if (step === 'ask_cnic') {
+            if (saidNo) {
+                stopAndReset("CNIC entry canceled. Press any key to start again.");
+                return;
+            }
+
             const digits = heard.replace(/\D/g, '').slice(0, 13);
             if (digits.length === 13) {
                 pendingCnic = digits;
                 askConfirmCnic();
             } else {
-                speak("I heard only " + digits.length + " digits. Let's try again.", askCnic);
+                cnicTries++;
+                if (cnicTries >= MAX_CNIC_TRIES) {
+                    stopAndReset("Maximum attempts reached for entering CNIC. Press any key to start again.");
+                } else {
+                    speak("I heard only " + digits.length + " digits. Attempt " + cnicTries + " of " + MAX_CNIC_TRIES + ". Let's try again.", askCnic);
+                }
             }
         }
         else if (step === 'confirm_cnic') {
-            const saidYes = heard.includes('yes') || heard.includes('okay') ||
-                            heard.includes('ok') || heard.includes("it's okay") || heard.includes('it is');
             if (saidYes) {
                 statusSpan.innerText = "Checking with server...";
                 sendToDjango(pendingCnic);
+            } else if (saidNo) {
+                cnicTries++;
+                if (cnicTries >= MAX_CNIC_TRIES) {
+                    stopAndReset("Maximum attempts reached. Please contact polling staff for help.");
+                } else {
+                    speak("Okay, let's try entering your C N I C again.", askCnic);
+                }
             } else {
-                speak("Okay, let's try again.", askCnic);
+                speak("Please answer with yes or no.", askConfirmCnic);
             }
         }
     };

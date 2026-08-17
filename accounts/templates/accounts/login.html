@@ -16,15 +16,3 @@
 <script src="{% static 'accounts/js/login.js' %}"></script>
 {% endblock %}
 
-<script>
-function speak(text) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-}
-window.addEventListener('load', function () {
-    speak("Welcome to the voting system. Please type your 13 digit CNIC number.");
-});
-</script>

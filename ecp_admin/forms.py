@@ -80,7 +80,7 @@ class ElectionForm(forms.ModelForm):
 
         return cleaned_data
 
-    def save(self, commit=True):
+    def save(self, commit=True):  # noqa: FBT002
         # Generate instance object without executing immediate SQL write operations
         instance = super().save(commit=False)
 

@@ -1,0 +1,26 @@
+Location,Province,City,Block Code,Serial Number Start From,Serial Number End At,Assigned Constituency NA,Assigned Constituency PA
+Gov boys College,Balochistan,Quetta,1,1,20,NA-01,PA-01
+Gov boys College,Balochistan,Quetta,2,21,40,NA-01,PA-02
+Gov boys College,Balochistan,Quetta,3,41,60,NA-01,PA-03
+Gov boys College,Balochistan,Quetta,4,61,80,NA-01,PA-04
+Gov boys College,Balochistan,Quetta,5,81,100,NA-01,PA-05
+Gov Girls University,Punjab,Lahore,6,1,20,NA-02,PA-06
+Gov Girls University,Punjab,Lahore,7,21,40,NA-02,PA-07
+Gov Girls University,Punjab,Lahore,8,41,60,NA-02,PA-08
+Gov Girls University,Punjab,Lahore,9,61,80,NA-02,PA-09
+Gov Girls University,Punjab,Lahore,10,81,100,NA-02,PA-10
+Iqra University,Sindh,Karachi,11,1,20,NA-03,PA-11
+Iqra University,Sindh,Karachi,12,21,40,NA-03,PA-12
+Iqra University,Sindh,Karachi,13,41,60,NA-03,PA-13
+Iqra University,Sindh,Karachi,14,61,80,NA-03,PA-14
+Iqra University,Sindh,Karachi,15,81,100,NA-03,PA-15
+GIKI University,Khyber Pakhtunkhwa,Peshawar,16,1,20,NA-04,PA-16
+GIKI University,Khyber Pakhtunkhwa,Peshawar,17,21,40,NA-04,PA-17
+GIKI University,Khyber Pakhtunkhwa,Peshawar,18,41,60,NA-04,PA-18
+GIKI University,Khyber Pakhtunkhwa,Peshawar,19,61,80,NA-04,PA-19
+GIKI University,Khyber Pakhtunkhwa,Peshawar,20,81,100,NA-04,PA-20
+NUST University,Islamabad Capital Territory,Islamabad,21,1,20,NA-05,PA-21
+NUST University,Islamabad Capital Territory,Islamabad,22,21,40,NA-05,PA-22
+NUST University,Islamabad Capital Territory,Islamabad,23,41,60,NA-05,PA-23
+NUST University,Islamabad Capital Territory,Islamabad,24,61,80,NA-05,PA-24
+NUST University,Islamabad Capital Territory,Islamabad,25,81,100,NA-05,PA-25

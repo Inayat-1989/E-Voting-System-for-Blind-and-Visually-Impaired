@@ -34,8 +34,8 @@ class Election(models.Model):
 
     title = models.CharField(max_length=255, default="General Elections Pakistan")
     election_type = models.CharField(max_length=15, choices=ELECTION_TYPES, default="NATIONAL")
-    is_NA = models.BooleanField(default=True)
-    is_PA = models.BooleanField(default=True)
+    is_na = models.BooleanField(default=True)
+    is_pa = models.BooleanField(default=True)
     start_time = models.DateTimeField(default=timezone.now, editable=True)
     end_time = models.DateTimeField(default=get_default_end_time)
 
@@ -70,7 +70,7 @@ class Election(models.Model):
         super().save(*args, **kwargs)
 
     @classmethod
-    def load(cls):
+    def load(cls):  # noqa: ANN206
         obj, _created = cls.objects.get_or_create(
             pk=1,
             defaults={
@@ -112,6 +112,18 @@ class Constituency(models.Model):
 
     def __str__(self):
         return f"{self.constituency_id} ({self.assembly_type})"
+
+
+class ConstituencyMapping(models.Model):
+    block_code = models.CharField(max_length=50, primary_key=True)
+    constituency_na = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="na_mappings")
+    constituency_pa = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="pa_mappings")
+
+    class Meta:
+        db_table = "constituency_mapping"
+
+    def __str__(self):
+        return f"Block Code: {self.block_code}"
 
 
 class Candidate(models.Model):
@@ -161,9 +173,12 @@ class PollingStation(models.Model):
 
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="polling_stations")
     station_id = models.CharField(max_length=50, primary_key=True, default="STATION-000")
-    location_name = models.CharField(max_length=255, default="Government Building")
-    constituency_na = models.CharField(max_length=20, default="NA-0")
-    constituency_pa = models.CharField(max_length=20, default="PA-0")
+    location_name = models.CharField(max_length=255, default="Government Building")  # 0
+    block_code = models.IntegerField(default=0)  # 3
+    serial_number_start_from = models.IntegerField(default=1)  # 4
+    serial_number_end_at = models.IntegerField(default=999)  # 5
+    constituency_na = models.CharField(max_length=20, default="NA-00")  # 6
+    constituency_pa = models.CharField(max_length=20, default="PA-00")  # 7
     is_connected_to_central_server = models.BooleanField(default=True)
 
     def __str__(self):

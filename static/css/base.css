@@ -1,30 +1,30 @@
 :root {
     color-scheme: light;
-    --bg: #f0f4f8;
-    --card: #ffffff;
-    --text: #111827;
-    --muted: #374151;
-    --accent: #1d4ed8;
+    --bg: #ffffff;
+    --card: #f8fafc;
+    --text: #0f172a;        /* Deep slate, much higher contrast than standard gray */
+    --muted: #334155;       /* Darker muted text for readability */
+    --accent: #1d4ed8;      /* Strong accessible royal blue */
     --accent-hover: #1e40af;
-    --danger: #b91c1c;
-    --border: #6b7280;
-    --pill-bg: #dbeafe;
+    --danger: #991b1b;      /* Deep accessible red */
+    --border: #475569;      /* Clear visible borders */
+    --pill-bg: #e0f2fe;
     --focus-outline: #2563eb;
 }
 
-/* High Contrast Themes (WCAG AAA Compliance: Yellow on Black) */
+/* High Contrast / Low-Vision Theme (WCAG AAA Compliant) */
 [data-theme="high-contrast"] {
     color-scheme: dark;
-    --bg: #000000;
-    --card: #121212;
-    --text: #ffff00;
-    --muted: #ffffff;
-    --accent: #00ffff;
-    --accent-hover: #00cccc;
-    --danger: #ff4d4d;
-    --border: #ffff00;
-    --pill-bg: #000000;
-    --focus-outline: #ffffff;
+    --bg: #0a0a0a;          /* Softened absolute black to reduce screen glare */
+    --card: #171717;        /* Distinct card surface */
+    --text: #facc15;        /* Warm amber/yellow (easier on eyes than harsh neon yellow) */
+    --muted: #f3f4f6;       /* Crisp off-white for secondary text */
+    --accent: #38bdf8;      /* High-contrast bright sky blue for actions */
+    --accent-hover: #7dd3fc;
+    --danger: #f87171;      /* Bright, readable warning red */
+    --border: #facc15;      /* Matching primary text for clear bounding boxes */
+    --pill-bg: #1f2937;
+    --focus-outline: #ffffff; /* Blinding white outline for absolute keyboard visibility */
 }
 
 * {
@@ -51,6 +51,11 @@ body {
 *:focus-visible {
     outline: 5px solid var(--focus-outline) !important;
     outline-offset: 4px;
+}
+
+button:focus, input:focus, .voting-card:focus {
+    outline: 4px solid var(--focus-outline);
+    outline-offset: 2px;
 }
 
 /* Layout Structure & Spacing */

@@ -13,8 +13,8 @@ admin.site.register(ConstituencyMapping)
 class ElectionAdmin(admin.ModelAdmin):
     """Admin interface for the Election model."""
 
-    list_display = ("title", "election_type", "start_time", "end_time", "is_open")
-    list_filter = ("election_type", "start_time", "end_time")
+    list_display = ("title", "start_time", "end_time", "is_open")
+    list_filter = ("start_time", "end_time")
     search_fields = ("title",)
 
     @admin.display(boolean=True, description="Currently Open")

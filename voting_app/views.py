@@ -44,19 +44,22 @@ def show_candidates(request, title, assembly):
     voter = Voter.objects.get(id=voter_id)
     candidates = None
     constituency_mapping = ConstituencyMapping.objects.get(block_code=voter.block_code)
+    constituency = None
     if not constituency_mapping:
         messages.error(request, "You can't Vote, Invalid Voter!")
         return render(request, "voting_app/elections.html")
     if assembly == "NATIONAL":
-        candidates = Candidate.objects.filter(constituency=constituency_mapping.constituency_na, assembly_type=assembly)
+        constituency = Constituency.objects.get(constituency_id=constituency_mapping.constituency_na)
+        candidates = Candidate.objects.filter(constituency=constituency)
     elif assembly == "PROVINCIAL":
-        candidates = Candidate.objects.filter(constituency=constituency_mapping.constituency_pa, assembly_type=assembly)
+        constituency = Constituency.objects.get(constituency_id=constituency_mapping.constituency_pa)
+        candidates = Candidate.objects.filter(constituency=constituency)
     else:
         messages.error(request, "Invalid Assembly Type")
         return render(request, "voting_app/elections.html")
     if not candidates.exists():
         messages.error(request, "No such candidates exists!")
-        return render(request, "voting_app/elections.html")
+        return render(request, "voting_app/elections.html", {"election": election})
     return render(
         request,
         "voting_app/vote.html",
@@ -99,8 +102,6 @@ def vote_view(request):
             "block_code": voter.block_code,
             "serial_number_start_from": start,
             "serial_number_end_at": end,
-            # "constituency_na": constituency_id_na,
-            # "constituency_pa": constituency_id_pa,
             "is_connected_to_central_server": True,
         },
     )
@@ -133,7 +134,7 @@ def vote_view(request):
     if ballot_box.total_votes_cast == constituency.registered_voters_count:
         messages.error(request, "Already Maxed out Votes Casted for this Constituency")
         return render(request, "voting_app/elections.html", {"election": election})
-    is_casted = vote(request, candidate, ballot_box, election)
+    is_casted = vote(request, candidate, ballot_box)
     if is_casted:
         if election_type == "NATIONAL":
             voter.has_voted_na = True
@@ -144,10 +145,10 @@ def vote_view(request):
     else:
         messages.error(request, "Vote Casting Failed Retry!")
         return render(request, "voting_app/elections.html", {"election": election})
-    return render(request, "voting_app/elections.html", {"election": election})
+    return render(request, "voting_app/assembly_types.html", {"election_title": election.title, "voter": voter})
 
 
-def vote(request, candidate, ballot_box, election):
+def vote(request, candidate, ballot_box):
     with transaction.atomic():
         tallies = ballot_box.vote_tallies or {}
         current_count = tallies.get(str(candidate.candidate_id), 0)
@@ -155,6 +156,5 @@ def vote(request, candidate, ballot_box, election):
         ballot_box.vote_tallies = tallies
         ballot_box.total_votes_cast += 1
         ballot_box.save()
-        messages.success(request, "Your vote has been Successfully Casted!")
         return True
     return False

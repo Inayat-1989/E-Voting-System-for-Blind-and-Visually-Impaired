@@ -14,11 +14,6 @@ def get_default_end_time():
     return get_default_start_time() + relativedelta(years=5)
 
 
-class AssemblyType(models.TextChoices):
-    NATIONAL_ASSEMBLY = "NATIONAL", "National Assembly"
-    PROVINCIAL_ASSEMBLY = "PROVINCIAL", "Provincial Assembly"
-
-
 # --- MODELS ---
 class Election(models.Model):
     """Admin-managed configuration for scheduling simultaneous elections.
@@ -27,13 +22,7 @@ class Election(models.Model):
     identities.
     """
 
-    ELECTION_TYPES = [
-        ("NATIONAL", "National Assembly"),
-        ("PROVINCIAL", "Provincial Assembly"),
-    ]
-
     title = models.CharField(max_length=255, default="General Elections Pakistan")
-    election_type = models.CharField(max_length=15, choices=ELECTION_TYPES, default="NATIONAL")
     is_na = models.BooleanField(default=True)
     is_pa = models.BooleanField(default=True)
     start_time = models.DateTimeField(default=timezone.now, editable=True)
@@ -75,7 +64,6 @@ class Election(models.Model):
             pk=1,
             defaults={
                 "title": "Default Election",
-                "election_type": "General",
                 "start_time": timezone.now(),
                 "end_time": timezone.now(),
             },
@@ -116,11 +104,7 @@ class Constituency(models.Model):
     constituency_id = models.CharField(max_length=20, primary_key=True, default="NA-00")
     province = models.CharField(max_length=255, default="Punjab")
     city = models.CharField(max_length=255, default="Lahore")
-    assembly_type = models.CharField(
-        max_length=20,
-        choices=AssemblyType.choices,
-        default=AssemblyType.NATIONAL_ASSEMBLY,
-    )
+    assembly_type = models.CharField(max_length=255, default="NATIONAL")
     registered_voters_count = models.IntegerField(default=0)
 
     def __str__(self):
@@ -137,11 +121,7 @@ class Candidate(models.Model):
     province = models.CharField(max_length=255, default="Punjab")
     city = models.CharField(max_length=255, default="Lahore")
     assigned_symbol = models.ImageField(upload_to="election_symbols/", blank=True, null=True)
-    assembly_type = models.CharField(
-        max_length=20,
-        choices=AssemblyType.choices,
-        default=AssemblyType.NATIONAL_ASSEMBLY,
-    )
+    assembly_type = models.CharField(max_length=255, default="NATIONAL")
     constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="candidates")
 
     def __str__(self):
@@ -172,11 +152,7 @@ class BallotBox(models.Model):
 
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="ballot_boxes")
     ballot_box_id = models.CharField(max_length=50, primary_key=True, default="BOX-000")
-    assembly_type = models.CharField(
-        max_length=20,
-        choices=AssemblyType.choices,
-        default=AssemblyType.NATIONAL_ASSEMBLY,
-    )
+    assembly_type = models.CharField(max_length=255, default="NATIONAL")
     constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="ballot_boxes")
     vote_tallies = models.JSONField(
         default=dict,

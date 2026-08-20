@@ -7,7 +7,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 
 from accounts.models import Voter
-from voting_app.models import BallotBox, Candidate, Constituency, Election, PollingStation
+from voting_app.models import BallotBox, Candidate, Constituency, ConstituencyMapping, Election, PollingStation
 
 from .forms import ECPBulkUploadForm, ElectionForm
 
@@ -50,6 +50,7 @@ def ecp_election_upload(request):
             Election.objects.all().delete()
             Voter.objects.all().delete()
             Constituency.objects.all().delete()
+            ConstituencyMapping.objects.all().delete()
             Candidate.objects.all().delete()
             PollingStation.objects.all().delete()
             BallotBox.objects.all().delete()
@@ -62,7 +63,7 @@ def ecp_election_upload(request):
 
 
 # @staff_member_required(login_url="/login/")
-def ecp_election_data(request):  # noqa: C901, PLR0912
+def ecp_election_data(request):  # noqa: C901
     election = Election.objects.first()
     if not election:
         messages.error(request, "Error: You must configure an Election instance before uploading data files.")
@@ -86,69 +87,96 @@ def ecp_election_data(request):  # noqa: C901, PLR0912
             next(voter_data)  # Skip header
 
             for row in voter_data:
+                if row[2] != "Active" or row[3] != "Yes":
+                    continue
                 Voter.objects.get_or_create(
                     cnic=row[0],
                     defaults={
                         "cnic": row[0],
                         "full_name": row[1],
-                        "assigned_constituency_na": row[5],
-                        "assigned_constituency_pa": row[6],
+                        "province": row[4],
+                        "city": row[5],
+                        "block_code": row[6],
+                        "serial_number": row[7],
                         "is_biometrically_verified": True,
                     },
                 )
-                constituency_obj, _ = Constituency.objects.get_or_create(
-                    constituency_id=row[5],
+
+            # --- 2. PROCESS Constituency Mapping and Constituency Creation ---
+            constituency_mapping_file = request.FILES["constituency_mappings_file"]
+            constituency_mapping_data = csv.reader(io.StringIO(constituency_mapping_file.read().decode("utf-8")))
+            next(constituency_mapping_data)
+            for row in constituency_mapping_data:
+                ConstituencyMapping.objects.get_or_create(
+                    block_code=row[0],
                     defaults={
-                        "election": election,
-                        "province": row[3],
-                        "assembly_type": "NATIONAL",
-                        "registered_voters_count": 0,
+                        "block_code": row[0],
+                        "constituency_na": row[1],
+                        "constituency_pa": row[2],
                     },
                 )
-                constituency_obj, _ = Constituency.objects.get_or_create(
-                    constituency_id=row[6],
+
+            total_constituencies_mapping = ConstituencyMapping.objects.all()
+            block_code_list = []
+            for constituency_mapping in total_constituencies_mapping:
+                voter = Voter.objects.filter(block_code=constituency_mapping.block_code)
+                if not voter.exists():
+                    continue
+                registered_voters_count_for_pa = voter.count()
+                province, city = voter.values_list("province", "city").first()
+                constituency_pa_obj, _created = Constituency.objects.get_or_create(
+                    constituency_id=constituency_mapping.constituency_pa,
                     defaults={
                         "election": election,
-                        "province": row[3],
+                        "constituency_id": constituency_mapping.constituency_pa,
+                        "province": province,
+                        "city": city,
                         "assembly_type": "PROVINCIAL",
-                        "registered_voters_count": 0,
+                        "registered_voters_count": registered_voters_count_for_pa,
+                    },
+                )
+                if constituency_mapping.block_code in block_code_list:
+                    continue
+                block_code_list = ConstituencyMapping.objects.filter(
+                    constituency_na=constituency_mapping.constituency_na
+                ).values_list("block_code", flat=True)
+                registered_voters_count_for_na = Voter.objects.filter(block_code__in=block_code_list).count()
+                constituency_na_obj, _created = Constituency.objects.get_or_create(
+                    constituency_id=constituency_mapping.constituency_na,
+                    defaults={
+                        "election": election,
+                        "constituency_id": constituency_mapping.constituency_na,
+                        "province": province,
+                        "city": city,
+                        "assembly_type": "NATIONAL",
+                        "registered_voters_count": registered_voters_count_for_na,
                     },
                 )
 
-            all_constituencies = Constituency.objects.all()
-
-            for constituency in all_constituencies:
-                if constituency.assembly_type == "NATIONAL":
-                    registered_voters_count = Voter.objects.filter(
-                        assigned_constituency_na=constituency.constituency_id
-                    ).count()
-                elif constituency.assembly_type == "PROVINCIAL":
-                    registered_voters_count = Voter.objects.filter(
-                        assigned_constituency_pa=constituency.constituency_id
-                    ).count()
-                constituency.registered_voters_count = registered_voters_count
-                constituency.save()
-
-            # --- 2. PROCESS CANDIDATES & AUTO-CREATE CONSTITUENCIES ---
+            # --- 2. PROCESS CANDIDATES ---
             candidate_file = request.FILES["candidates_file"]
             candidate_data = csv.reader(io.StringIO(candidate_file.read().decode("utf-8")))
             next(candidate_data)  # Skip header
 
             for row in candidate_data:
-                constituency_obj = Constituency.objects.get(constituency_id=row[6])
-                if constituency_obj:
-                    Candidate.objects.get_or_create(
-                        candidate_id=f"CAND-{row[0]}",
-                        assembly_type=row[5],
-                        defaults={
-                            "election": election,
-                            "candidate_id": f"CAND-{row[0]}",
-                            "name": row[1],
-                            "political_party": row[2],
-                            "constituency": constituency_obj,
-                            "assembly_type": row[5],
-                        },
-                    )
+                try:
+                    constituency_obj = Constituency.objects.get(constituency_id=row[6])
+                except Constituency.DoesNotExist:
+                    continue
+                Candidate.objects.get_or_create(
+                    candidate_id=row[0],
+                    assembly_type=row[5],
+                    defaults={
+                        "election": election,
+                        "candidate_id": row[0],
+                        "name": row[1],
+                        "political_party": row[2],
+                        "province": row[3],
+                        "city": row[4],
+                        "assembly_type": row[5],
+                        "constituency": constituency_obj,
+                    },
+                )
 
             # --- 3. PROCESS POLLING STATIONS & AUTO-CREATE BALLOT BOXES ---
             station_file = request.FILES["polling_stations_file"]
@@ -156,51 +184,63 @@ def ecp_election_data(request):  # noqa: C901, PLR0912
             next(station_data)  # Skip header
 
             for row in station_data:
-                constituency_na = Constituency.objects.get(constituency_id=row[3])
-                constituency_pa = Constituency.objects.get(constituency_id=row[4])
+                constituency_mapping = ConstituencyMapping.objects.get(block_code=row[3])
+                constituency_na = constituency_mapping.constituency_na
+                constituency_pa = constituency_mapping.constituency_pa
+                try:
+                    constituency_pa_obj = Constituency.objects.get(constituency_id=constituency_pa)
+                except Constituency.DoesNotExist:
+                    continue
+                try:
+                    constituency_na_obj = Constituency.objects.get(constituency_id=constituency_na)
+                except Constituency.DoesNotExist:
+                    continue
                 polling_station, _ = PollingStation.objects.get_or_create(
-                    station_id=f"PS-{row[3]}-{row[4]}",
+                    station_id=f"PS-{constituency_na}-{constituency_pa}",
                     defaults={
                         "election": election,
-                        "station_id": f"PS-{row[3]}-{row[4]}",
+                        "station_id": f"PS-{constituency_na}-{constituency_pa}",
                         "location_name": row[0],
-                        "constituency_na": row[3],
-                        "constituency_pa": row[4],
+                        "province": row[1],
+                        "city": row[2],
+                        "block_code": row[3],
+                        "serial_number_start_from": row[4],
+                        "serial_number_end_at": row[5],
+                        "constituency_na": row[6],
+                        "constituency_pa": row[7],
                     },
                 )
 
                 # Create NA Ballot Box
-                if constituency_na:
-                    BallotBox.objects.get_or_create(
-                        ballot_box_id=f"BOX-{polling_station.station_id}-NA",
-                        defaults={
-                            "election": election,
-                            "ballot_box_id": f"BOX-{polling_station.station_id}-NA",
-                            "constituency": constituency_na,
-                            "assembly_type": "NATIONAL",
-                            "vote_tallies": {},
-                            "total_votes_cast": 0,
-                        },
-                    )
+                BallotBox.objects.get_or_create(
+                    ballot_box_id=f"BOX-{polling_station.station_id}-NA",
+                    defaults={
+                        "election": election,
+                        "ballot_box_id": f"BOX-{polling_station.station_id}-NA",
+                        "assembly_type": "NATIONAL",
+                        "constituency": constituency_na_obj,
+                        "vote_tallies": {},
+                        "total_votes_cast": 0,
+                    },
+                )
 
                 # Create PA Ballot Box
-                if constituency_pa:
-                    BallotBox.objects.get_or_create(
-                        ballot_box_id=f"BOX-{polling_station.station_id}-PA",
-                        defaults={
-                            "election": election,
-                            "ballot_box_id": f"BOX-{polling_station.station_id}-PA",
-                            "constituency": constituency_pa,
-                            "assembly_type": "PROVINCIAL",
-                            "vote_tallies": {},
-                            "total_votes_cast": 0,
-                        },
-                    )
+                BallotBox.objects.get_or_create(
+                    ballot_box_id=f"BOX-{polling_station.station_id}-PA",
+                    defaults={
+                        "election": election,
+                        "ballot_box_id": f"BOX-{polling_station.station_id}-PA",
+                        "assembly_type": "PROVINCIAL",
+                        "constituency": constituency_pa_obj,
+                        "vote_tallies": {},
+                        "total_votes_cast": 0,
+                    },
+                )
         messages.success(request, "All systems integrated successfully! Database updated.")
         return redirect("../login/")
     except Exception as e:  # noqa: BLE001
         messages.error(request, f"Database insertion aborted! Formatting or index error detected: {e}")
-    return redirect("ecp_admin/login")
+    return redirect("../login/")
 
 
 def ecp_logout(request):

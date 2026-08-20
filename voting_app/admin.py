@@ -1,11 +1,12 @@
 from django.contrib import admin
 
-from .models import BallotBox, Candidate, Constituency, Election, PollingStation
+from .models import BallotBox, Candidate, Constituency, ConstituencyMapping, Election, PollingStation
 
 admin.site.register(Candidate)
 admin.site.register(BallotBox)
 admin.site.register(Constituency)
 admin.site.register(PollingStation)
+admin.site.register(ConstituencyMapping)
 
 
 @admin.register(Election)

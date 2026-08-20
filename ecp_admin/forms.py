@@ -5,11 +5,14 @@ from voting_app.models import Election
 
 
 class ECPBulkUploadForm(forms.Form):
+    voters_file = forms.FileField(label="Voters List CSV", widget=forms.FileInput(attrs={"accept": ".csv"}))
+    candidates_file = forms.FileField(label="Candidates List CSV", widget=forms.FileInput(attrs={"accept": ".csv"}))
+    constituency_mappings_file = forms.FileField(
+        label="Constituency and Block Mapping CSV", widget=forms.FileInput(attrs={"accept": ".csv"})
+    )
     polling_stations_file = forms.FileField(
         label="Polling Stations CSV", widget=forms.FileInput(attrs={"accept": ".csv"})
     )
-    candidates_file = forms.FileField(label="Candidates List CSV", widget=forms.FileInput(attrs={"accept": ".csv"}))
-    voters_file = forms.FileField(label="Voters List CSV", widget=forms.FileInput(attrs={"accept": ".csv"}))
 
 
 class ElectionForm(forms.ModelForm):

@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from accounts.models import Voter
 
 from .decorators import voter_required
-from .models import BallotBox, Candidate, Constituency, Election, PollingStation
+from .models import BallotBox, Candidate, Constituency, ConstituencyMapping, Election, PollingStation
 
 
 @voter_required
@@ -43,14 +43,14 @@ def show_candidates(request, title, assembly):
     voter_id = request.session.get("voter_id")
     voter = Voter.objects.get(id=voter_id)
     candidates = None
-    polling_station = PollingStation.objects.get(block_code=voter.block_code)
-    if not polling_station:
-        messages.error(request, "You can't Vote, No Polling Station Available")
+    constituency_mapping = ConstituencyMapping.objects.get(block_code=voter.block_code)
+    if not constituency_mapping:
+        messages.error(request, "You can't Vote, Invalid Voter!")
         return render(request, "voting_app/elections.html")
     if assembly == "NATIONAL":
-        candidates = Candidate.objects.filter(constituency=polling_station.constituency_na, assembly_type=assembly)
+        candidates = Candidate.objects.filter(constituency=constituency_mapping.constituency_na, assembly_type=assembly)
     elif assembly == "PROVINCIAL":
-        candidates = Candidate.objects.filter(constituency=polling_station.constituency_pa, assembly_type=assembly)
+        candidates = Candidate.objects.filter(constituency=constituency_mapping.constituency_pa, assembly_type=assembly)
     else:
         messages.error(request, "Invalid Assembly Type")
         return render(request, "voting_app/elections.html")
@@ -66,10 +66,6 @@ def show_candidates(request, title, assembly):
 
 @voter_required
 def vote_view(request):
-    """Handles automated constituency matching, ballot box auto-generation,
-
-    and secure vote recording for the logged-in voter.
-    """
     if request.method != "POST":
         messages.error(request, "Method is not POST!")
         return render(request, "voting_app/elections.html")
@@ -85,9 +81,14 @@ def vote_view(request):
     ballot_box = None
     polling_station = None
     constituency = None
-    constituency_id_na = voter.assigned_constituency_na
-    constituency_id_pa = voter.assigned_constituency_pa
+    constituency_mapping = ConstituencyMapping.objects.get(block_code=voter.block_code)
+    if not constituency_mapping:
+        messages.error(request, "No Constituency Mapping Exists for the Block")
+        return render(request, "voting_app/elections.html")
+    constituency_id_na = constituency_mapping.constituency_na
+    constituency_id_pa = constituency_mapping.constituency_pa
     constituency_id = constituency_id_na + "-" + constituency_id_pa
+    start, end = voter.serial_range
 
     polling_station, _created = PollingStation.objects.get_or_create(
         station_id=f"PS-{constituency_id}",
@@ -95,20 +96,24 @@ def vote_view(request):
             "election": election,
             "station_id": f"PS-{constituency_id}",
             "location_name": "Government Building",
-            "constituency_na": constituency_id_na,
-            "constituency_pa": constituency_id_pa,
+            "block_code": voter.block_code,
+            "serial_number_start_from": start,
+            "serial_number_end_at": end,
+            # "constituency_na": constituency_id_na,
+            # "constituency_pa": constituency_id_pa,
             "is_connected_to_central_server": True,
         },
     )
     polling_station.save()
+    registered_voters_count = Voter.objects.filter(block_code=constituency_mapping.block_code).count()
     constituency, _created = Constituency.objects.get_or_create(
-        constituency_id=candidate.constituency,
+        constituency_id=candidate.constituency.constituency_id,
         defaults={
             "election": election,
-            "constituency_id": candidate.constituency,
-            "province": "Punjab",  # Voter specified Province
+            "constituency_id": candidate.constituency.constituency_id,
+            "province": voter.province,
             "assembly_type": election_type,
-            "registered_voters_count": 10,  # later as voter is added registered count increase
+            "registered_voters_count": registered_voters_count,
         },
     )
     constituency.save()
@@ -125,6 +130,9 @@ def vote_view(request):
         },
     )
     ballot_box.save()
+    if ballot_box.total_votes_cast == constituency.registered_voters_count:
+        messages.error(request, "Already Maxed out Votes Casted for this Constituency")
+        return render(request, "voting_app/elections.html", {"election": election})
     is_casted = vote(request, candidate, ballot_box, election)
     if is_casted:
         if election_type == "NATIONAL":

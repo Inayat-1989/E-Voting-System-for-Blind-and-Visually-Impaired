@@ -27,14 +27,14 @@
                 </div>
             {% endif %}
 
-            <!-- Polling Stations File Field -->
+            <!-- Voters File Field -->
             <div class="item">
-                <label for="{{ form.polling_stations_file.id_for_label }}">
-                    {{ form.polling_stations_file.label }}
+                <label for="{{ form.voters_file.id_for_label }}">
+                    {{ form.voters_file.label }}
                 </label>
-                {{ form.polling_stations_file }}
-                {% if form.polling_stations_file.errors %}
-                    <div class="messages"><div class="error">{{ form.polling_stations_file.errors.as_text }}</div></div>
+                {{ form.voters_file }}
+                {% if form.voters_file.errors %}
+                    <div class="messages"><div class="error">{{ form.voters_file.errors.as_text }}</div></div>
                 {% endif %}
             </div>
 
@@ -49,14 +49,25 @@
                 {% endif %}
             </div>
 
-            <!-- Voters File Field -->
+            <!-- Constituency Block Mapping File Field -->
             <div class="item">
-                <label for="{{ form.voters_file.id_for_label }}">
-                    {{ form.voters_file.label }}
+                <label for="{{ form.constituency_mappings_file.id_for_label }}">
+                    {{ form.constituency_mappings_file.label }}
                 </label>
-                {{ form.voters_file }}
-                {% if form.voters_file.errors %}
-                    <div class="messages"><div class="error">{{ form.voters_file.errors.as_text }}</div></div>
+                {{ form.constituency_mappings_file }}
+                {% if form.constituency_mappings_file.errors %}
+                    <div class="messages"><div class="error">{{ form.constituency_mappings_file.errors.as_text }}</div></div>
+                {% endif %}
+            </div>
+
+            <!-- Polling Stations File Field -->
+            <div class="item">
+                <label for="{{ form.polling_stations_file.id_for_label }}">
+                    {{ form.polling_stations_file.label }}
+                </label>
+                {{ form.polling_stations_file }}
+                {% if form.polling_stations_file.errors %}
+                    <div class="messages"><div class="error">{{ form.polling_stations_file.errors.as_text }}</div></div>
                 {% endif %}
             </div>
 

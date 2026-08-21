@@ -1,46 +1,173 @@
-from django.conf import settings
+import re
+
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import redirect, render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
 
-from .models import Candidate, Election, Vote, Voter
+from accounts.models import Voter
+
+from .decorators import voter_required
+from .models import BallotBox, Candidate, Constituency, Election, PollingStation
 
 
+@voter_required
 def elections_list(request):
-    if not request.session.get("voter_id"):
+    voter_id = request.session.get("voter_id")
+    if not voter_id:
         messages.error(request, "Please log in first.")
         return redirect("account/login")
 
-    # .prefetch_related("candidates")
-    elections = Election.objects.all()
-    return render(request, "voting_app/elections.html", {"elections": elections})
+    election = Election.objects.first()
+    return render(request, "voting_app/elections.html", {"election": election})
 
 
-def vote(request, election_id):
-    if not request.session.get("voter_id"):
-        messages.error(request, "Please log in first.")
-        return redirect("login")
+def assembly_types(request, title):
+    voter = Voter.objects.get(id=request.session.get("voter_id"))
+    if voter.has_voted_na and voter.has_voted_pa:
+        election = Election.objects.first()
+        messages.success(request, "You have voted both votes Successfully!")
+        return render(request, "voting_app/elections.html", {"election": election})
+    return render(
+        request,
+        "voting_app/assembly_types.html",
+        {"election_title": title, "voter": voter},
+    )
 
-    voter = Voter.objects.get(id=request.session["voter_id"])
-    election = Election.objects.get(id=election_id)
 
-    if not voter.is_disabled:
-        messages.error(request, "Only disabled voters are allowed to vote in this system.")
-        return render(request, "vote.html", {"election": election, "voter": voter, "allowed": False})
+@voter_required
+def show_candidates(request, title, assembly):
+    election = Election.objects.filter(title=title).first()
+    if not election:
+        messages.error(request, "No Elections at this Moment exists!")
+        return render(request, "voting_app/elections.html")
+    voter_id = request.session.get("voter_id")
+    voter = Voter.objects.get(id=voter_id)
+    candidates = None
+    if assembly == "NATIONAL":
+        candidates = Candidate.objects.filter(constituency=voter.assigned_constituency_na, assembly_type=assembly)
+    elif assembly == "PROVINCIAL":
+        candidates = Candidate.objects.filter(constituency=voter.assigned_constituency_pa, assembly_type=assembly)
+    else:
+        messages.error(request, "Invalid Assembly Type")
+        return render(request, "voting_app/elections.html")
+    if not candidates.exists():
+        messages.error(request, "No such candidates exists!")
+        return render(request, "voting_app/elections.html")
+    return render(
+        request,
+        "voting_app/vote.html",
+        {"election_id": election.pk, "candidates": candidates, "voter_id": voter.id},
+    )
 
-    if request.method == "POST":
-        candidate_id = request.POST.get("candidate_id")
-        candidate = Candidate.objects.filter(id=candidate_id, election=election).first()
-        if not candidate:
-            messages.error(request, "Please select a valid candidate.")
-            return render(request, "vote.html", {"election": election, "voter": voter, "allowed": True})
-        if Vote.objects.filter(election=election, voter=voter).exists():
-            messages.error(request, "You have already voted in this election.")
-            return render(request, "vote.html", {"election": election, "voter": voter, "allowed": True})
-        Vote.objects.create(election=election, voter=voter, candidate=candidate)
-        messages.success(request, "Your vote was recorded.")
-        return render(request, "vote.html", {"election": election, "voter": voter, "allowed": True, "submitted": True})
 
-    return render(request, "vote.html", {"election": election, "voter": voter, "allowed": True})
+@voter_required
+def vote_view(request):
+    """Handles automated constituency matching, ballot box auto-generation,
+
+    and secure vote recording for the logged-in voter.
+    """
+    if request.method != "POST":
+        messages.error(request, "Method is not POST!")
+        return render(request, "voting_app/elections.html")
+    try:
+        election = Election.objects.get(pk=request.POST.get("election_id"))
+        candidate = Candidate.objects.get(candidate_id=request.POST.get("candidate_id"))
+        voter = Voter.objects.get(id=request.session.get("voter_id"))
+    except (Election.DoesNotExist, Candidate.DoesNotExist, Voter.DoesNotExist):
+        messages.error(request, "Can't Vote Error Occured 404!")
+        return render(request, "voting_app/elections.html")
+
+    # election_type = election.election_type
+    election_type = candidate.assembly_type
+    ballot_box = None
+    polling_station = None
+    constituency = None
+    constituency_id_na = voter.assigned_constituency_na
+    constituency_id_pa = voter.assigned_constituency_pa
+    # constituency_id_na = re.sub(r"[^0-9]", "", voter.assigned_constituency_na)
+    # constituency_id_pa = re.sub(r"[^0-9]", "", voter.assigned_constituency_pa)
+    constituency_id = constituency_id_na + "-" + constituency_id_pa
+
+    polling_station, _created = PollingStation.objects.get_or_create(
+        station_id=f"PS-{constituency_id}",
+        defaults={
+            "election": election,
+            "station_id": f"PS-{constituency_id}",
+            "location_name": "Government Building",
+            "constituency_na": constituency_id_na,
+            "constituency_pa": constituency_id_pa,
+            "is_connected_to_central_server": True,
+        },
+    )
+    polling_station.save()
+    constituency, _created = Constituency.objects.get_or_create(
+        constituency_id=candidate.constituency,
+        defaults={
+            "election": election,
+            "constituency_id": candidate.constituency,
+            "province": "Punjab",  # Voter specified Province
+            "assembly_type": election_type,
+            "registered_voters_count": 10,  # later as voter is added registered count increase
+        },
+    )
+    # if election.is_NA:
+    #     constituency, _created = Constituency.objects.get_or_create(
+    #         constituency_id=voter.assigned_constituency_na,
+    #         defaults={
+    #             "election": election,
+    #             "constituency_id": voter.assigned_constituency_na,
+    #             "province": "Punjab",  # Voter specified Province
+    #             "assembly_type": "NATIONAL",
+    #             "registered_voters_count": 10,
+    #         },
+    #     )
+    # if election.is_PA:
+    #     constituency, _created = Constituency.objects.get_or_create(
+    #         constituency_id=voter.assigned_constituency_pa,
+    #         defaults={
+    #             "election": election,
+    #             "constituency_id": voter.assigned_constituency_pa,
+    #             "province": "Punjab",  # Voter specified Province
+    #             "assembly_type": "PROVINCIAL",
+    #             "registered_voters_count": 10,
+    #         },
+    #     )
+    constituency.save()
+    constituency_id = re.sub(r"[^a-zA-Z]", "", constituency.constituency_id)
+    ballot_box, _created = BallotBox.objects.get_or_create(
+        ballot_box_id=f"BOX-{polling_station.station_id}-{constituency_id}",
+        defaults={
+            "election": election,
+            "ballot_box_id": f"BOX-{polling_station.station_id}-{constituency_id}",
+            "assembly_type": election_type,
+            "constituency": constituency,
+            "vote_tallies": {},
+            "total_votes_cast": 0,
+        },
+    )
+    ballot_box.save()
+    is_casted = vote(request, candidate, ballot_box, election)
+    if is_casted:
+        if election_type == "NATIONAL":
+            voter.has_voted_na = True
+        elif election_type == "PROVINCIAL":
+            voter.has_voted_pa = True
+        voter.save()
+        messages.success(request, "Your vote has been Successfully Casted!")
+    else:
+        messages.error(request, "Vote Casting Failed Retry!")
+        return render(request, "voting_app/elections.html", {"election": election})
+    return render(request, "voting_app/elections.html", {"election": election})
+
+
+def vote(request, candidate, ballot_box, election):
+    with transaction.atomic():
+        tallies = ballot_box.vote_tallies or {}
+        current_count = tallies.get(str(candidate.candidate_id), 0)
+        tallies[str(candidate.candidate_id)] = current_count + 1
+        ballot_box.vote_tallies = tallies
+        ballot_box.total_votes_cast += 1
+        ballot_box.save()
+        messages.success(request, "Your vote has been Successfully Casted!")
+        return True
+    return False

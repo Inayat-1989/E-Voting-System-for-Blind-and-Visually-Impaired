@@ -36,7 +36,10 @@ class VotingStoriesTests(TestCase):
         self.client.session["voter_id"] = voter.id
         self.client.session.save()
 
-        response = self.client.post(reverse("vote", args=[self.election.id]), {"candidate_id": self.candidate.id})
+        response = self.client.post(
+            reverse("vote", args=[self.election.id]),
+            {"candidate_id": self.candidate.id},
+        )
         self.assertContains(response, "Only disabled voters")
 
     def test_voting_allows_disabled_voter(self):
@@ -44,5 +47,8 @@ class VotingStoriesTests(TestCase):
         self.client.session["voter_id"] = voter.id
         self.client.session.save()
 
-        response = self.client.post(reverse("vote", args=[self.election.id]), {"candidate_id": self.candidate.id})
+        response = self.client.post(
+            reverse("vote", args=[self.election.id]),
+            {"candidate_id": self.candidate.id},
+        )
         self.assertContains(response, "Your vote was recorded")

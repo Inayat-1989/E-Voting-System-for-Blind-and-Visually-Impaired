@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<nav>
+    <a href="{% url 'logout' %}">Logout</a>
+</nav>
+<button onclick="history.back()">Go Back </button>
+<h2>{{ election_title }}</h2>
+<div id="user-component" data-has_voted_na="{{ voter.has_voted_na }}" data-has_voted_pa="{{ voter.has_voted_pa }}" data-redirect-url="{% url 'elections' %}"
+    hidden>
+</div>
+{% if voter %}
+<div class="grid">
+    <input type="hidden" name="voter_id" value="{{ voter.id }}">
+    <div class="item">
+        <h3>National Assembly</h3>
+        <div id="na_link" class="actions"><a
+                href="{% url 'candidates' title=election_title assembly='NATIONAL'  %}">Vote now</a>
+        </div>
+    </div>
+    <div class="item">
+        <h3>Provincial Assembly</h3>
+        <div id="pa_link" class="actions"><a
+                href="{% url 'candidates' title=election_title assembly='PROVINCIAL' %}">Vote now</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'voting_app/js/assembly_types.js' %}"></script>
+{% endblock %}

@@ -13,6 +13,8 @@ Network Trash Folder
 Temporary Items
 apdisk
 ### Python ###
+**/migrations/
+*/migrations/*.pyc
 __pycache__/
 *.py[cod]
 *.so

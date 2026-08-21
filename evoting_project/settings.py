@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,8 +14,8 @@ STATICFILES_DIRS = [
 
 # Make sure Django's built-in app directory scanner is enabled
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder', # <--- THIS IS REQUIRED TO FIND APP STATIC FOLDERS
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # <--- THIS IS REQUIRED TO FIND APP STATIC FOLDERS
 ]
 
 INSTALLED_APPS = [
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "voting_app",
     "accounts",
+    "ecp_admin",
 ]
 
 MIDDLEWARE = [
@@ -61,13 +61,13 @@ ASGI_APPLICATION = "evoting_project.asgi.application"
 
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
-LOGIN_URL = 'login'
+LOGIN_URL = "login"
 
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
+TIME_ZONE = "Asia/Karachi"
 USE_TZ = True
+USE_I18N = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

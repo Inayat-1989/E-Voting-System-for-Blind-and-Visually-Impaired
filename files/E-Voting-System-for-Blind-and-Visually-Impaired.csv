@@ -1,0 +1,13 @@
+             A                        B                        C                        D                        E                        F                        G                        
+1            Important, Later         Important, Later         Important, Later         Not Important, Later     Important, Later         Not Important, Later     Important, Now           
+2            Important, Later         Important, Later         Important, Later         Important, Now, Done     Important, Later         Not Important, Later     Important, Now           
+3            Important, Later         Important, Later         Important, Later         Important, Now           Important, Later         Not Important, Later     Important, Now           
+4            Important, Now                                    Important, Later         Not Important, Later     Important, Later         Important, Later         Important, Now           
+5            Important, Now                                                             Important, Now, Partial  Important, Later         Not Important, Later     Important, Now           
+6            Important, Now                                                             Important, Now                                                             Important, Now           
+7            Important, Now                                                             Important, Now                                                             Important, Now           
+8            Important, Later                                                                                                                                      Important, Now           
+9            Important, Now                                                                                                                                        
+10           Important, Later                                                                                                                                      
+11           Important, Now                                                                                                                                        
+12           Not Important, Later                                                                                                                                  

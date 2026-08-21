@@ -5,29 +5,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/ico" href="{% static 'images/favicon.ico' %}">
   <title>Blind Voter E-Voting</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-  <!-- Keyboard skip target -->
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-
   <div class="shell">
-    <!-- Top Bar containing Global Accessibility Controls -->
     <header class="accessibility-bar" aria-label="Accessibility Toolbar">
-      <span>System Access</span>
-      <button id="contrast-toggle" aria-label="Toggle High Contrast Mode"
-        style="width: auto; min-height: 48px; padding: 10px 20px; font-size: 1rem;">
+      <button id="contrast-toggle" aria-label="Toggle High Contrast Mode">
         Toggle High Contrast
       </button>
     </header>
 
-    <!-- System Application Notification Messages -->
+
     <div class="messages">
       {% if messages %}
       {% for message in messages %}
@@ -36,7 +28,6 @@
       {% endif %}
     </div>
 
-    <!-- Core Content Container Grid -->
     <main id="main-content" class="card">
       {% block content %}{% endblock %}
     </main>
@@ -44,9 +35,8 @@
     <!-- Voice Control Panel Configuration Base Interface -->
     <section class="voice-controls" aria-label="Voice Interface Controls">
       <h2>Voice Command Center</h2>
-      <p style="font-size: 1.1rem; color: var(--muted); margin-bottom: 20px;">Use your voice to securely navigate and
+      <p>Use your voice to securely navigate and
         input credentials.</p>
-
       <button id="start-btn">
         Start Listening
       </button>
@@ -61,7 +51,7 @@
         <strong>Server Status:</strong> <span id="server-response">None</span>
       </div>
     </section>
-  </div>  
+  </div>
   <script src="{% static 'js/base.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>

@@ -62,6 +62,65 @@ def ecp_election_upload(request):
     return render(request, "ecp_admin/election.html")
 
 
+def ecp_report(request):
+    all_ballot_boxes = BallotBox.objects.all()
+
+    na_ballot_boxes = all_ballot_boxes.filter(assembly_type="NATIONAL")
+
+    pa_ballot_boxes = all_ballot_boxes.filter(assembly_type="PROVINCIAL")
+
+    na_count = sum(na_ballot_boxes.values_list("total_votes_cast", flat=True))
+    pa_count = sum(pa_ballot_boxes.values_list("total_votes_cast", flat=True))
+
+    return render(request, "ecp_admin/reports.html", {"na_count": na_count, "pa_count": pa_count})
+
+
+def ecp_na_constituencies(request):
+    na_constituencies = Constituency.objects.filter(assembly_type="NATIONAL")
+    if not na_constituencies.exists():
+        messages.error(request, "No Constituencies Exists")
+        return render(request, "ecp_admin/reports.html")
+    return render(request, "ecp_admin/na_constituencies.html", {"na_constituencies": na_constituencies})
+
+
+def ecp_pa_constituencies(request):
+    pa_constituencies = Constituency.objects.filter(assembly_type="PROVINCIAL")
+    if not pa_constituencies.exists():
+        messages.error(request, "No Constituencies Exists")
+        return render(request, "ecp_admin/reports.html")
+    return render(request, "ecp_admin/pa_constituencies.html", {"pa_constituencies": pa_constituencies})
+
+
+def ecp_na_candidates(request, constituency_id):
+    na_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
+    vote_tallies = BallotBox.objects.filter(constituency_id=constituency_id).values_list("vote_tallies", flat=True)
+    if not na_constituency_candidates.exists() or not vote_tallies.exists():
+        messages.error(request, "Candidate/Ballot Box Does not exists.")
+        return render(request, "ecp_admin/reports.html")
+    candidate_count = {}
+    for candidate in na_constituency_candidates:
+        count = 0
+        for vote_tally in vote_tallies:
+            if candidate.candidate_id in vote_tally:
+                count += vote_tally[candidate.candidate_id]
+        candidate_count[candidate] = count
+    return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
+
+
+def ecp_pa_candidates(request, constituency_id):
+    pa_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
+    vote_tally = BallotBox.objects.filter(constituency_id=constituency_id).first().vote_tallies
+    if not pa_constituency_candidates.exists():
+        messages.error(request, "Candidate Does not exists.")
+        return render(request, "ecp_admin/reports.html")
+    candidate_count = {}
+    for candidate in pa_constituency_candidates:
+        candidate_count[candidate] = 0
+        if candidate.candidate_id in vote_tally:
+            candidate_count[candidate] = vote_tally[candidate.candidate_id]
+    return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
+
+
 # @staff_member_required(login_url="/login/")
 def ecp_election_data(request):  # noqa: C901
     election = Election.objects.first()
@@ -165,7 +224,7 @@ def ecp_election_data(request):  # noqa: C901
                     continue
                 Candidate.objects.get_or_create(
                     candidate_id=row[0],
-                    assembly_type=row[5],
+                    constituency_id=constituency_obj.constituency_id,
                     defaults={
                         "election": election,
                         "candidate_id": row[0],

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <button onclick="history.back()">Go Back</button>
+    <div class="card">        
+        <div class="grid">
+            {% for constituency in pa_constituencies %}
+            <div class="item">
+                <h2>{{ constituency.constituency_id }}</h2>
+                <div class="actions"><a href="{% url 'ecp_pa_candidate' constituency.constituency_id %}">Candidates result</a></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

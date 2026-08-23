@@ -3,6 +3,7 @@ import io
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.shortcuts import redirect, render
 
@@ -16,7 +17,6 @@ User = get_user_model()
 
 def ecp_dashboard(request):
     return render(request, "ecp_admin/login.html")
-
 
 def ecp_login(request):
     if request.user.is_authenticated and request.user.is_staff:
@@ -37,12 +37,12 @@ def ecp_login(request):
         return render(request, "ecp_admin/menu.html", {"election": election})
     return render(request, "ecp_admin/login.html")
 
-
+@staff_member_required(login_url="../")
 def ecp_election_creation_form(request):
     form = ElectionForm()
     return render(request, "ecp_admin/election.html", {"form": form})
 
-
+@staff_member_required(login_url="../")
 def ecp_election_upload(request):
     if request.method == "POST":
         form = ElectionForm(request.POST)
@@ -61,7 +61,7 @@ def ecp_election_upload(request):
         messages.error(request, "Form is not Valid, Please recreate Election.")
     return render(request, "ecp_admin/election.html")
 
-
+@staff_member_required(login_url="../")
 def ecp_report(request):
     all_ballot_boxes = BallotBox.objects.all()
 
@@ -74,7 +74,7 @@ def ecp_report(request):
 
     return render(request, "ecp_admin/reports.html", {"na_count": na_count, "pa_count": pa_count})
 
-
+@staff_member_required(login_url="../")
 def ecp_na_constituencies(request):
     na_constituencies = Constituency.objects.filter(assembly_type="NATIONAL")
     if not na_constituencies.exists():
@@ -82,7 +82,7 @@ def ecp_na_constituencies(request):
         return render(request, "ecp_admin/reports.html")
     return render(request, "ecp_admin/na_constituencies.html", {"na_constituencies": na_constituencies})
 
-
+@staff_member_required(login_url="../")
 def ecp_pa_constituencies(request):
     pa_constituencies = Constituency.objects.filter(assembly_type="PROVINCIAL")
     if not pa_constituencies.exists():
@@ -90,7 +90,7 @@ def ecp_pa_constituencies(request):
         return render(request, "ecp_admin/reports.html")
     return render(request, "ecp_admin/pa_constituencies.html", {"pa_constituencies": pa_constituencies})
 
-
+@staff_member_required(login_url="../")
 def ecp_na_candidates(request, constituency_id):
     na_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
     vote_tallies = BallotBox.objects.filter(constituency_id=constituency_id).values_list("vote_tallies", flat=True)
@@ -106,7 +106,7 @@ def ecp_na_candidates(request, constituency_id):
         candidate_count[candidate] = count
     return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
 
-
+@staff_member_required(login_url="../")
 def ecp_pa_candidates(request, constituency_id):
     pa_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
     vote_tally = BallotBox.objects.filter(constituency_id=constituency_id).first().vote_tallies
@@ -121,7 +121,7 @@ def ecp_pa_candidates(request, constituency_id):
     return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
 
 
-# @staff_member_required(login_url="/login/")
+@staff_member_required(login_url="../")
 def ecp_election_data(request):  # noqa: C901
     election = Election.objects.first()
     if not election:
@@ -301,7 +301,7 @@ def ecp_election_data(request):  # noqa: C901
         messages.error(request, f"Database insertion aborted! Formatting or index error detected: {e}")
     return redirect("../login/")
 
-
+@staff_member_required(login_url="../")
 def ecp_logout(request):
     if request.user.is_authenticated:
         request.user.current_session_key = None

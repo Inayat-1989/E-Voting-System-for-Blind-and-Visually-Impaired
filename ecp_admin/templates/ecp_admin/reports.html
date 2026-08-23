@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <button onclick="history.back()">Go Back</button>
+    <h1>Election Results</h1>
+    <p class="muted">Select a section below to review the candidate list and vote calculations.</p>
+
+    <div class="grid">
+        <div class="card">
+        <h3>National Assembly</h3>
+            <div id="na_constituencies" class="actions"><a
+                href="{% url 'ecp_na_constituencies' %}">National Constituencies</a>
+            </div>
+            <p>Total National Votes Cast: <strong>{{ na_count|default:"0" }}</strong></p>
+        </div>
+        <div class="card">
+        <h3>Provincial Assembly</h3>
+            <div id="pa_constituencies" class="actions"><a
+                href="{% url 'ecp_pa_constituencies' %}">Provincial Constituencies</a>
+            </div>
+            <p>Total Provincial Votes Cast: <strong>{{ pa_count|default:"0" }}</strong></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

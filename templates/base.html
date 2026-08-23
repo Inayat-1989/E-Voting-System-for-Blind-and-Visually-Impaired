@@ -1,7 +1,6 @@
 {% load static %}
 <!doctype html>
 <html lang="{{ request.LANGUAGE_CODE|default:'en' }}">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +9,6 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
-
 <body>
   <div class="shell">
     <header class="accessibility-bar" aria-label="Accessibility Toolbar">
@@ -18,8 +16,6 @@
         Toggle High Contrast
       </button>
     </header>
-
-
     <div class="messages">
       {% if messages %}
       {% for message in messages %}
@@ -27,33 +23,11 @@
       {% endfor %}
       {% endif %}
     </div>
-
     <main id="main-content" class="card">
       {% block content %}{% endblock %}
     </main>
-
-    <!-- Voice Control Panel Configuration Base Interface -->
-    <section class="voice-controls" aria-label="Voice Interface Controls">
-      <h2>Voice Command Center</h2>
-      <p>Use your voice to securely navigate and
-        input credentials.</p>
-      <button id="start-btn">
-        Start Listening
-      </button>
-
-      <div class="voice-status-box">
-        <strong>Status:</strong> <span id="status">Idle</span>
-      </div>
-      <div class="voice-status-box">
-        <strong>Transcript:</strong> <span id="transcript">None</span>
-      </div>
-      <div class="voice-status-box">
-        <strong>Server Status:</strong> <span id="server-response">None</span>
-      </div>
-    </section>
   </div>
   <script src="{% static 'js/base.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
-
 </html>

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <button onclick="history.back()">Go Back</button>
+    <div>
+        {% for candidate, count in candidate_count.items %}
+        <div class="item">
+            <h4><u>{{ candidate.political_party }}: </u>{{ candidate.name }}</h4><h6> Votes: {{ count }}</h6>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

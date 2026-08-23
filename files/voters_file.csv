@@ -1,50 +1,399 @@
-Cnic,Full Name,Mothers Name,Province,City,Assigned Constituency NA,Assigned Constituency PA
-5440119457643,Inayat Ullah,ABC,Balochistan,Quetta,NA-00,PA-04
-1234567891011,Salar Khan,ABC,Balochistan,Quetta,NA-00,PA-04
-1111111111111,Ahmed,ABC,Balochistan,Quetta,NA-00,PA-04
-2222222222222,Abbas,ABC,Balochistan,Quetta,NA-00,PA-04
-3333333333333,Ali,ABC,Balochistan,Quetta,NA-00,PA-04
-4444444444444,Nehad,ABC,Balochistan,Quetta,NA-00,PA-04
-5555555555555,Hafiz,ABC,Balochistan,Quetta,NA-00,PA-04
-6666666666666,Sami,ABC,Balochistan,Quetta,NA-00,PA-04
-7777777777777,Saeed,ABC,Balochistan,Quetta,NA-00,PA-04
-8888888888888,Kaleem,ABC,Punjab,Lahore,NA-01,PA-02
-9999999999999,Naveed,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000000,Waheed,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000001,Azeem,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000002,Ghulam,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000003,Niamat,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000004,Ghulam,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000005,Farooq,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000006,Sail,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000007,Yahya,ABC,Punjab,Lahore,NA-01,PA-02
-1000000000008,Gul,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000009,Shah,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000010,Sahab,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000011,Shahab,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000012,Waleed,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000013,Wakeel,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000014,Waqar,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000015,Adeel,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000016,Asim,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000017,Hanif,ABC,Sindh,Karachi,NA-02,PA-03
-1000000000018,Qabil,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000019,Khaleel,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000020,Darmand,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000021,Doran,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000022,Awais,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000023,Owais,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000024,Imran,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000025,Wasif,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000026,Babar,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000027,Rizwan,ABC,Khyber Pakhtunkhwa,Peshawar,NA-03,PA-01
-1000000000028,Zia ul Haq,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000029,Farooq,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000030,Naseem,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000031,Bilal,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000032,Babar,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000033,Tawab,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000034,Wahab,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000035,Abdullah,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000036,Nazim,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
-1000000000037,Noureen,ABC,Islamabad Capital Territory,Islamabad,NA-04,PA-00
+Cnic,Full Name,Status,Disabled,Province,City,Block Code,Serial Number,Assigned Constituency NA,Assigned Constituency PA
+1000000000001,Inayat Ullah,Active,Yes,Balochistan,Quetta,1,1,NA-01,PA-01
+1000000000002,Salar Khan,Active,Yes,Balochistan,Quetta,1,2,NA-01,PA-02
+1000000000003,Ahmed,Active,Yes,Balochistan,Quetta,1,3,NA-01,PA-03
+1000000000004,Abbas,Active,Yes,Balochistan,Quetta,1,4,NA-01,PA-04
+1000000000005,Ali,Active,Yes,Balochistan,Quetta,1,5,NA-01,PA-05
+1000000000006,Nehad,Active,Yes,Balochistan,Quetta,1,6,NA-01,PA-01
+1000000000007,Hafiz,Active,Yes,Balochistan,Quetta,1,7,NA-01,PA-02
+1000000000008,Sami,Active,Yes,Balochistan,Quetta,1,8,NA-01,PA-03
+1000000000009,Saeed,Active,Yes,Balochistan,Quetta,1,9,NA-01,PA-04
+1000000000010,Kaleem,Active,Yes,Punjab,Lahore,6,1,NA-02,PA-06
+1000000000011,Naveed,Active,Yes,Punjab,Lahore,6,2,NA-02,PA-07
+1000000000012,Waheed,Active,Yes,Punjab,Lahore,6,3,NA-02,PA-08
+1000000000013,Azeem,Active,Yes,Punjab,Lahore,6,4,NA-02,PA-09
+1000000000014,Ghulam,Active,Yes,Punjab,Lahore,6,5,NA-02,PA-10
+1000000000015,Niamat,Active,Yes,Punjab,Lahore,6,6,NA-02,PA-06
+1000000000016,Ghulam,Active,Yes,Punjab,Lahore,6,7,NA-02,PA-07
+1000000000017,Farooq,Active,Yes,Punjab,Lahore,6,8,NA-02,PA-08
+1000000000018,Sail,Active,Yes,Punjab,Lahore,6,9,NA-02,PA-09
+1000000000019,Yahya,Active,Yes,Punjab,Lahore,6,10,NA-02,PA-10
+1000000000020,Gul,Active,Yes,Sindh,Karachi,11,1,NA-03,PA-11
+1000000000021,Shah,Active,Yes,Sindh,Karachi,11,2,NA-03,PA-12
+1000000000022,Sahab,Active,Yes,Sindh,Karachi,11,3,NA-03,PA-13
+1000000000023,Shahab,Active,Yes,Sindh,Karachi,11,4,NA-03,PA-14
+1000000000024,Waleed,Active,Yes,Sindh,Karachi,11,5,NA-03,PA-15
+1000000000025,Wakeel,Active,Yes,Sindh,Karachi,11,6,NA-03,PA-15
+1000000000026,Waqar,Active,Yes,Sindh,Karachi,11,7,NA-03,PA-11
+1000000000027,Adeel,Active,Yes,Sindh,Karachi,11,8,NA-03,PA-12
+1000000000028,Asim,Active,Yes,Sindh,Karachi,11,9,NA-03,PA-13
+1000000000029,Hanif,Active,Yes,Sindh,Karachi,11,10,NA-03,PA-14
+1000000000030,Qabil,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,1,NA-04,PA-17
+1000000000031,Khaleel,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,2,NA-04,PA-18
+1000000000032,Darmand,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,3,NA-04,PA-19
+1000000000033,Doran,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,4,NA-04,PA-20
+1000000000034,Awais,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,5,NA-04,PA-16
+1000000000035,Owais,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,6,NA-04,PA-17
+1000000000036,Imran,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,7,NA-04,PA-18
+1000000000037,Wasif,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,8,NA-04,PA-19
+1000000000038,Babar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,9,NA-04,PA-20
+1000000000039,Rizwan,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,10,NA-04,PA-16
+1000000000040,Zia ul Haq,Active,Yes,Islamabad Capital Territory,Islamabad,21,1,NA-05,PA-21
+1000000000041,Farooq,Active,Yes,Islamabad Capital Territory,Islamabad,21,2,NA-05,PA-22
+1000000000042,Naseem,Active,Yes,Islamabad Capital Territory,Islamabad,21,3,NA-05,PA-23
+1000000000043,Bilal,Active,Yes,Islamabad Capital Territory,Islamabad,21,4,NA-05,PA-24
+1000000000044,Babar,Active,Yes,Islamabad Capital Territory,Islamabad,21,5,NA-05,PA-25
+1000000000045,Tawab,Active,Yes,Islamabad Capital Territory,Islamabad,21,6,NA-05,PA-21
+1000000000046,Wahab,Active,Yes,Islamabad Capital Territory,Islamabad,21,7,NA-05,PA-22
+1000000000047,Abdullah,Active,Yes,Islamabad Capital Territory,Islamabad,21,8,NA-05,PA-23
+1000000000048,Nazim,Active,Yes,Islamabad Capital Territory,Islamabad,21,9,NA-05,PA-24
+1000000000049,Noureen,Active,Yes,Islamabad Capital Territory,Islamabad,21,10,NA-05,PA-25
+1000000000050,Khalid,Active,Yes,Balochistan,Quetta,1,10,NA-01,PA-01
+1000000000051,Kamil,Active,Yes,Balochistan,Quetta,1,11,NA-01,PA-02
+1000000000052,Zahir,Active,Yes,Balochistan,Quetta,1,12,NA-01,PA-03
+1000000000053,Zabeel,Active,Yes,Balochistan,Quetta,1,13,NA-01,PA-04
+1000000000054,Zahoor,Active,Yes,Balochistan,Quetta,1,14,NA-01,PA-05
+1000000000055,Qarar,Active,Yes,Balochistan,Quetta,1,15,NA-01,PA-01
+1000000000056,Zarar,Active,Yes,Balochistan,Quetta,1,16,NA-01,PA-02
+1000000000057,Nadir,Active,Yes,Balochistan,Quetta,1,17,NA-01,PA-03
+1000000000058,Naseeb,Active,Yes,Balochistan,Quetta,1,18,NA-01,PA-04
+1000000000059,Nasim,Active,Yes,Balochistan,Quetta,1,19,NA-01,PA-01
+1000000000060,Nazeer,Active,Yes,Balochistan,Quetta,1,20,NA-01,PA-02
+1000000000061,Nayab,Active,Yes,Balochistan,Quetta,2,21,NA-01,PA-03
+1000000000062,Naveed,Active,Yes,Balochistan,Quetta,2,22,NA-01,PA-04
+1000000000063,Naqeeb,Active,Yes,Balochistan,Quetta,2,23,NA-01,PA-05
+1000000000064,Hakim,Active,Yes,Balochistan,Quetta,2,24,NA-01,PA-01
+1000000000065,Farooq,Active,Yes,Balochistan,Quetta,2,25,NA-01,PA-02
+1000000000066,Shahzil,Active,Yes,Balochistan,Quetta,2,26,NA-01,PA-03
+1000000000067,Shahid,Active,Yes,Balochistan,Quetta,2,27,NA-01,PA-04
+1000000000068,Mansoor,Active,Yes,Balochistan,Quetta,2,28,NA-01,PA-01
+1000000000069,Manzoor,Active,Yes,Balochistan,Quetta,2,29,NA-01,PA-02
+1000000000070,Malik,Active,Yes,Balochistan,Quetta,2,30,NA-01,PA-03
+1000000000071,Dumar,Active,Yes,Balochistan,Quetta,2,31,NA-01,PA-04
+1000000000072,Jabbar,Active,Yes,Balochistan,Quetta,2,32,NA-01,PA-05
+1000000000073,Jabir,Active,Yes,Balochistan,Quetta,2,33,NA-01,PA-01
+1000000000074,Sabir,Active,Yes,Balochistan,Quetta,2,34,NA-01,PA-02
+1000000000075,Saliq,Active,Yes,Balochistan,Quetta,2,35,NA-01,PA-03
+1000000000076,Sadan,Active,Yes,Balochistan,Quetta,2,36,NA-01,PA-04
+1000000000077,Saleem,Active,Yes,Balochistan,Quetta,2,37,NA-01,PA-01
+1000000000078,Kaleem,Active,Yes,Balochistan,Quetta,2,38,NA-01,PA-02
+1000000000079,Faheem,Active,Yes,Balochistan,Quetta,2,39,NA-01,PA-03
+1000000000080,Waseem,Active,Yes,Balochistan,Quetta,2,40,NA-01,PA-04
+1000000000081,Wasit,Active,Yes,Balochistan,Quetta,3,41,NA-01,PA-05
+1000000000082,Zubair,Active,Yes,Balochistan,Quetta,3,42,NA-01,PA-01
+1000000000083,Jasra,Active,Yes,Balochistan,Quetta,3,43,NA-01,PA-02
+1000000000084,Shah Mehmood,Active,Yes,Balochistan,Quetta,3,44,NA-01,PA-03
+1000000000085,Zain,Active,Yes,Balochistan,Quetta,3,45,NA-01,PA-04
+1000000000086,Abid,Active,Yes,Balochistan,Quetta,3,46,NA-01,PA-01
+1000000000087,Inayat Ullah,Active,Yes,Punjab,Lahore,6,11,NA-02,PA-06
+1000000000088,Salar Khan,Active,Yes,Punjab,Lahore,6,12,NA-02,PA-07
+1000000000089,Ahmed,Active,Yes,Punjab,Lahore,6,13,NA-02,PA-08
+1000000000090,Abbas,Active,Yes,Punjab,Lahore,6,14,NA-02,PA-09
+1000000000091,Ali,Active,Yes,Punjab,Lahore,6,15,NA-02,PA-10
+1000000000092,Nehad,Active,Yes,Punjab,Lahore,6,16,NA-02,PA-06
+1000000000093,Hafiz,Active,Yes,Punjab,Lahore,6,17,NA-02,PA-07
+1000000000094,Sami,Active,Yes,Punjab,Lahore,6,18,NA-02,PA-08
+1000000000095,Saeed,Active,Yes,Punjab,Lahore,6,19,NA-02,PA-09
+1000000000096,Kaleem,Active,Yes,Punjab,Lahore,6,20,NA-02,PA-10
+1000000000097,Naveed,Active,Yes,Sindh,Karachi,11,11,NA-03,PA-11
+1000000000098,Waheed,Active,Yes,Sindh,Karachi,11,12,NA-03,PA-12
+1000000000099,Azeem,Active,Yes,Sindh,Karachi,11,13,NA-03,PA-13
+1000000000100,Ghulam,Active,Yes,Sindh,Karachi,11,14,NA-03,PA-14
+1000000000101,Niamat,Active,Yes,Sindh,Karachi,11,15,NA-03,PA-15
+1000000000102,Ghulam,Active,Yes,Sindh,Karachi,11,16,NA-03,PA-15
+1000000000103,Farooq,Active,Yes,Sindh,Karachi,11,17,NA-03,PA-11
+1000000000104,Sail,Active,Yes,Sindh,Karachi,11,18,NA-03,PA-12
+1000000000105,Yahya,Active,Yes,Sindh,Karachi,11,19,NA-03,PA-13
+1000000000106,Gul,Active,Yes,Sindh,Karachi,11,20,NA-03,PA-14
+1000000000107,Shah,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,11,NA-04,PA-17
+1000000000108,Sahab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,12,NA-04,PA-18
+1000000000109,Shahab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,13,NA-04,PA-19
+1000000000110,Waleed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,14,NA-04,PA-20
+1000000000111,Wakeel,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,15,NA-04,PA-16
+1000000000112,Waqar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,16,NA-04,PA-17
+1000000000113,Adeel,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,17,NA-04,PA-18
+1000000000114,Asim,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,18,NA-04,PA-19
+1000000000115,Hanif,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,19,NA-04,PA-20
+1000000000116,Qabil,Active,Yes,Khyber Pakhtunkhwa,Peshawar,16,20,NA-04,PA-16
+1000000000117,Khaleel,Active,Yes,Islamabad Capital Territory,Islamabad,21,11,NA-05,PA-21
+1000000000118,Darmand,Active,Yes,Islamabad Capital Territory,Islamabad,21,12,NA-05,PA-22
+1000000000119,Doran,Active,Yes,Islamabad Capital Territory,Islamabad,21,13,NA-05,PA-23
+1000000000120,Awais,Active,Yes,Islamabad Capital Territory,Islamabad,21,14,NA-05,PA-24
+1000000000121,Owais,Active,Yes,Islamabad Capital Territory,Islamabad,21,15,NA-05,PA-25
+1000000000122,Imran,Active,Yes,Islamabad Capital Territory,Islamabad,21,16,NA-05,PA-21
+1000000000123,Wasif,Active,Yes,Islamabad Capital Territory,Islamabad,21,17,NA-05,PA-22
+1000000000124,Babar,Active,Yes,Islamabad Capital Territory,Islamabad,21,18,NA-05,PA-23
+1000000000125,Rizwan,Active,Yes,Islamabad Capital Territory,Islamabad,21,19,NA-05,PA-24
+1000000000126,Zia ul Haq,Active,Yes,Islamabad Capital Territory,Islamabad,21,20,NA-05,PA-25
+1000000000127,Farooq,Active,Yes,Punjab,Lahore,7,21,NA-02,PA-06
+1000000000128,Naseem,Active,Yes,Punjab,Lahore,7,22,NA-02,PA-07
+1000000000129,Bilal,Active,Yes,Punjab,Lahore,7,23,NA-02,PA-08
+1000000000130,Babar,Active,Yes,Punjab,Lahore,7,24,NA-02,PA-09
+1000000000131,Tawab,Active,Yes,Punjab,Lahore,7,25,NA-02,PA-10
+1000000000132,Wahab,Active,Yes,Punjab,Lahore,7,26,NA-02,PA-06
+1000000000133,Abdullah,Active,Yes,Punjab,Lahore,7,27,NA-02,PA-07
+1000000000134,Nazim,Active,Yes,Punjab,Lahore,7,28,NA-02,PA-08
+1000000000135,Noureen,Active,Yes,Punjab,Lahore,7,29,NA-02,PA-09
+1000000000136,Khalid,Active,Yes,Punjab,Lahore,7,30,NA-02,PA-10
+1000000000137,Kamil,Active,Yes,Sindh,Karachi,12,21,NA-03,PA-11
+1000000000138,Zahir,Active,Yes,Sindh,Karachi,12,22,NA-03,PA-12
+1000000000139,Zabeel,Active,Yes,Sindh,Karachi,12,23,NA-03,PA-13
+1000000000140,Zahoor,Active,Yes,Sindh,Karachi,12,24,NA-03,PA-14
+1000000000141,Qarar,Active,Yes,Sindh,Karachi,12,25,NA-03,PA-15
+1000000000142,Zarar,Active,Yes,Sindh,Karachi,12,26,NA-03,PA-15
+1000000000143,Nadir,Active,Yes,Sindh,Karachi,12,27,NA-03,PA-11
+1000000000144,Naseeb,Active,Yes,Sindh,Karachi,12,28,NA-03,PA-12
+1000000000145,Nasim,Active,Yes,Sindh,Karachi,12,29,NA-03,PA-13
+1000000000146,Nazeer,Active,Yes,Sindh,Karachi,12,30,NA-03,PA-14
+1000000000147,Nayab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,21,NA-04,PA-17
+1000000000148,Naveed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,22,NA-04,PA-18
+1000000000149,Naqeeb,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,23,NA-04,PA-19
+1000000000150,Hakim,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,24,NA-04,PA-20
+1000000000151,Farooq,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,25,NA-04,PA-16
+1000000000152,Shahzil,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,26,NA-04,PA-17
+1000000000153,Shahid,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,27,NA-04,PA-18
+1000000000154,Mansoor,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,28,NA-04,PA-19
+1000000000155,Manzoor,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,29,NA-04,PA-20
+1000000000156,Malik,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,30,NA-04,PA-16
+1000000000157,Dumar,Active,Yes,Islamabad Capital Territory,Islamabad,22,21,NA-05,PA-21
+1000000000158,Jabbar,Active,Yes,Islamabad Capital Territory,Islamabad,22,22,NA-05,PA-22
+1000000000159,Jabir,Active,Yes,Islamabad Capital Territory,Islamabad,22,23,NA-05,PA-23
+1000000000160,Sabir,Active,Yes,Islamabad Capital Territory,Islamabad,22,24,NA-05,PA-24
+1000000000161,Saliq,Active,Yes,Islamabad Capital Territory,Islamabad,22,25,NA-05,PA-25
+1000000000162,Sadan,Active,Yes,Islamabad Capital Territory,Islamabad,22,26,NA-05,PA-21
+1000000000163,Saleem,Active,Yes,Islamabad Capital Territory,Islamabad,22,27,NA-05,PA-22
+1000000000164,Kaleem,Active,Yes,Islamabad Capital Territory,Islamabad,22,28,NA-05,PA-23
+1000000000165,Faheem,Active,Yes,Islamabad Capital Territory,Islamabad,22,29,NA-05,PA-24
+1000000000166,Waseem,Active,Yes,Islamabad Capital Territory,Islamabad,22,30,NA-05,PA-25
+1000000000167,Wasit,Active,Yes,Punjab,Lahore,7,31,NA-02,PA-06
+1000000000168,Zubair,Active,Yes,Punjab,Lahore,7,32,NA-02,PA-07
+1000000000169,Jasra,Active,Yes,Punjab,Lahore,7,33,NA-02,PA-08
+1000000000170,Shah Mehmood,Active,Yes,Punjab,Lahore,7,34,NA-02,PA-09
+1000000000171,Zain,Active,Yes,Punjab,Lahore,7,35,NA-02,PA-10
+1000000000172,Abid,Active,Yes,Punjab,Lahore,7,36,NA-02,PA-06
+1000000000173,Inayat Ullah,Active,Yes,Punjab,Lahore,7,37,NA-02,PA-07
+1000000000174,Salar Khan,Active,Yes,Punjab,Lahore,7,38,NA-02,PA-08
+1000000000175,Ahmed,Active,Yes,Punjab,Lahore,7,39,NA-02,PA-09
+1000000000176,Abbas,Active,Yes,Punjab,Lahore,7,40,NA-02,PA-10
+1000000000177,Ali,Active,Yes,Sindh,Karachi,12,31,NA-03,PA-11
+1000000000178,Nehad,Active,Yes,Sindh,Karachi,12,32,NA-03,PA-12
+1000000000179,Hafiz,Active,Yes,Sindh,Karachi,12,33,NA-03,PA-13
+1000000000180,Sami,Active,Yes,Sindh,Karachi,12,34,NA-03,PA-14
+1000000000181,Saeed,Active,Yes,Sindh,Karachi,12,35,NA-03,PA-15
+1000000000182,Kaleem,Active,Yes,Sindh,Karachi,12,36,NA-03,PA-15
+1000000000183,Naveed,Active,Yes,Sindh,Karachi,12,37,NA-03,PA-11
+1000000000184,Waheed,Active,Yes,Sindh,Karachi,12,38,NA-03,PA-12
+1000000000185,Azeem,Active,Yes,Sindh,Karachi,12,39,NA-03,PA-13
+1000000000186,Ghulam,Active,Yes,Sindh,Karachi,12,40,NA-03,PA-14
+1000000000187,Niamat,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,31,NA-04,PA-17
+1000000000188,Ghulam,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,32,NA-04,PA-18
+1000000000189,Farooq,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,33,NA-04,PA-19
+1000000000190,Sail,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,34,NA-04,PA-20
+1000000000191,Yahya,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,35,NA-04,PA-16
+1000000000192,Gul,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,36,NA-04,PA-17
+1000000000193,Shah,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,37,NA-04,PA-18
+1000000000194,Sahab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,38,NA-04,PA-19
+1000000000195,Shahab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,39,NA-04,PA-20
+1000000000196,Waleed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,17,40,NA-04,PA-16
+1000000000197,Wakeel,Active,Yes,Islamabad Capital Territory,Islamabad,22,31,NA-05,PA-21
+1000000000198,Waqar,Active,Yes,Islamabad Capital Territory,Islamabad,22,32,NA-05,PA-22
+1000000000199,Adeel,Active,Yes,Islamabad Capital Territory,Islamabad,22,33,NA-05,PA-23
+1000000000200,Asim,Active,Yes,Islamabad Capital Territory,Islamabad,22,34,NA-05,PA-24
+1000000000201,Hanif,Active,Yes,Islamabad Capital Territory,Islamabad,22,35,NA-05,PA-25
+1000000000202,Qabil,Active,Yes,Islamabad Capital Territory,Islamabad,22,36,NA-05,PA-21
+1000000000203,Khaleel,Active,Yes,Islamabad Capital Territory,Islamabad,22,37,NA-05,PA-22
+1000000000204,Darmand,Active,Yes,Islamabad Capital Territory,Islamabad,22,38,NA-05,PA-23
+1000000000205,Doran,Active,Yes,Islamabad Capital Territory,Islamabad,22,39,NA-05,PA-24
+1000000000206,Awais,Active,Yes,Islamabad Capital Territory,Islamabad,22,40,NA-05,PA-25
+1000000000207,Owais,Active,Yes,Punjab,Lahore,8,41,NA-02,PA-06
+1000000000208,Imran,Active,Yes,Punjab,Lahore,8,42,NA-02,PA-07
+1000000000209,Wasif,Active,Yes,Punjab,Lahore,8,43,NA-02,PA-08
+1000000000210,Babar,Active,Yes,Punjab,Lahore,8,44,NA-02,PA-09
+1000000000211,Rizwan,Active,Yes,Punjab,Lahore,8,45,NA-02,PA-10
+1000000000212,Zia ul Haq,Active,Yes,Punjab,Lahore,8,46,NA-02,PA-06
+1000000000213,Farooq,Active,Yes,Punjab,Lahore,8,47,NA-02,PA-07
+1000000000214,Naseem,Active,Yes,Punjab,Lahore,8,48,NA-02,PA-08
+1000000000215,Bilal,Active,Yes,Punjab,Lahore,8,49,NA-02,PA-09
+1000000000216,Babar,Active,Yes,Punjab,Lahore,8,50,NA-02,PA-10
+1000000000217,Tawab,Active,Yes,Sindh,Karachi,13,41,NA-03,PA-11
+1000000000218,Wahab,Active,Yes,Sindh,Karachi,13,42,NA-03,PA-12
+1000000000219,Abdullah,Active,Yes,Sindh,Karachi,13,43,NA-03,PA-13
+1000000000220,Nazim,Active,Yes,Sindh,Karachi,13,44,NA-03,PA-14
+1000000000221,Noureen,Active,Yes,Sindh,Karachi,13,45,NA-03,PA-15
+1000000000222,Khalid,Active,Yes,Sindh,Karachi,13,46,NA-03,PA-15
+1000000000223,Kamil,Active,Yes,Sindh,Karachi,13,47,NA-03,PA-11
+1000000000224,Zahir,Active,Yes,Sindh,Karachi,13,48,NA-03,PA-12
+1000000000225,Zabeel,Active,Yes,Sindh,Karachi,13,49,NA-03,PA-13
+1000000000226,Zahoor,Active,Yes,Sindh,Karachi,13,50,NA-03,PA-14
+1000000000227,Qarar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,41,NA-04,PA-17
+1000000000228,Zarar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,42,NA-04,PA-18
+1000000000229,Nadir,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,43,NA-04,PA-19
+1000000000230,Naseeb,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,44,NA-04,PA-20
+1000000000231,Nasim,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,45,NA-04,PA-16
+1000000000232,Nazeer,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,46,NA-04,PA-17
+1000000000233,Nayab,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,47,NA-04,PA-18
+1000000000234,Naveed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,48,NA-04,PA-19
+1000000000235,Naqeeb,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,49,NA-04,PA-20
+1000000000236,Hakim,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,50,NA-04,PA-16
+1000000000237,Farooq,Active,Yes,Islamabad Capital Territory,Islamabad,23,41,NA-05,PA-21
+1000000000238,Shahzil,Active,Yes,Islamabad Capital Territory,Islamabad,23,42,NA-05,PA-22
+1000000000239,Shahid,Active,Yes,Islamabad Capital Territory,Islamabad,23,43,NA-05,PA-23
+1000000000240,Mansoor,Active,Yes,Islamabad Capital Territory,Islamabad,23,44,NA-05,PA-24
+1000000000241,Manzoor,Active,Yes,Islamabad Capital Territory,Islamabad,23,45,NA-05,PA-25
+1000000000242,Malik,Active,Yes,Islamabad Capital Territory,Islamabad,23,46,NA-05,PA-21
+1000000000243,Dumar,Active,Yes,Islamabad Capital Territory,Islamabad,23,47,NA-05,PA-22
+1000000000244,Jabbar,Active,Yes,Islamabad Capital Territory,Islamabad,23,48,NA-05,PA-23
+1000000000245,Jabir,Active,Yes,Islamabad Capital Territory,Islamabad,23,49,NA-05,PA-24
+1000000000246,Sabir,Active,Yes,Islamabad Capital Territory,Islamabad,23,50,NA-05,PA-25
+1000000000247,Saliq,Active,Yes,Punjab,Lahore,8,51,NA-02,PA-06
+1000000000248,Sadan,Active,Yes,Punjab,Lahore,8,52,NA-02,PA-07
+1000000000249,Saleem,Active,Yes,Punjab,Lahore,8,53,NA-02,PA-08
+1000000000250,Kaleem,Active,Yes,Punjab,Lahore,8,54,NA-02,PA-09
+1000000000251,Faheem,Active,Yes,Punjab,Lahore,8,55,NA-02,PA-10
+1000000000252,Waseem,Active,Yes,Punjab,Lahore,8,56,NA-02,PA-06
+1000000000253,Wasit,Active,Yes,Punjab,Lahore,8,57,NA-02,PA-07
+1000000000254,Zubair,Active,Yes,Punjab,Lahore,8,58,NA-02,PA-08
+1000000000255,Jasra,Active,Yes,Punjab,Lahore,8,59,NA-02,PA-09
+1000000000256,Shah Mehmood,Active,Yes,Punjab,Lahore,8,60,NA-02,PA-10
+1000000000257,Zain,Active,Yes,Sindh,Karachi,13,51,NA-03,PA-11
+1000000000258,Abid,Active,Yes,Sindh,Karachi,13,52,NA-03,PA-12
+1000000000259,Inayat Ullah,Active,Yes,Sindh,Karachi,13,53,NA-03,PA-13
+1000000000260,Salar Khan,Active,Yes,Sindh,Karachi,13,54,NA-03,PA-14
+1000000000261,Ahmed,Active,Yes,Sindh,Karachi,13,55,NA-03,PA-15
+1000000000262,Abbas,Active,Yes,Sindh,Karachi,13,56,NA-03,PA-15
+1000000000263,Ali,Active,Yes,Sindh,Karachi,13,57,NA-03,PA-11
+1000000000264,Nehad,Active,Yes,Sindh,Karachi,13,58,NA-03,PA-12
+1000000000265,Hafiz,Active,Yes,Sindh,Karachi,13,59,NA-03,PA-13
+1000000000266,Sami,Active,Yes,Sindh,Karachi,13,60,NA-03,PA-14
+1000000000267,Saeed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,51,NA-04,PA-17
+1000000000268,Kaleem,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,52,NA-04,PA-18
+1000000000269,Naveed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,53,NA-04,PA-19
+1000000000270,Waheed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,54,NA-04,PA-20
+1000000000271,Azeem,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,55,NA-04,PA-16
+1000000000272,Ghulam,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,56,NA-04,PA-17
+1000000000273,Niamat,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,57,NA-04,PA-18
+1000000000274,Ghulam,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,58,NA-04,PA-19
+1000000000275,Farooq,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,59,NA-04,PA-20
+1000000000276,Sail,Active,Yes,Khyber Pakhtunkhwa,Peshawar,18,60,NA-04,PA-16
+1000000000277,Yahya,Active,Yes,Islamabad Capital Territory,Islamabad,23,51,NA-05,PA-21
+1000000000278,Gul,Active,Yes,Islamabad Capital Territory,Islamabad,23,52,NA-05,PA-22
+1000000000279,Shah,Active,Yes,Islamabad Capital Territory,Islamabad,23,53,NA-05,PA-23
+1000000000280,Sahab,Active,Yes,Islamabad Capital Territory,Islamabad,23,54,NA-05,PA-24
+1000000000281,Shahab,Active,Yes,Islamabad Capital Territory,Islamabad,23,55,NA-05,PA-25
+1000000000282,Waleed,Active,Yes,Islamabad Capital Territory,Islamabad,23,56,NA-05,PA-21
+1000000000283,Wakeel,Active,Yes,Islamabad Capital Territory,Islamabad,23,57,NA-05,PA-22
+1000000000284,Waqar,Active,Yes,Islamabad Capital Territory,Islamabad,23,58,NA-05,PA-23
+1000000000285,Adeel,Active,Yes,Islamabad Capital Territory,Islamabad,23,59,NA-05,PA-24
+1000000000286,Asim,Active,Yes,Islamabad Capital Territory,Islamabad,23,60,NA-05,PA-25
+1000000000287,Hanif,Active,Yes,Punjab,Lahore,9,61,NA-02,PA-06
+1000000000288,Qabil,Active,Yes,Punjab,Lahore,9,62,NA-02,PA-07
+1000000000289,Khaleel,Active,Yes,Punjab,Lahore,9,63,NA-02,PA-08
+1000000000290,Darmand,Active,Yes,Punjab,Lahore,9,64,NA-02,PA-09
+1000000000291,Doran,Active,Yes,Punjab,Lahore,9,65,NA-02,PA-10
+1000000000292,Awais,Active,Yes,Punjab,Lahore,9,66,NA-02,PA-06
+1000000000293,Owais,Active,Yes,Punjab,Lahore,9,67,NA-02,PA-07
+1000000000294,Imran,Active,Yes,Punjab,Lahore,9,68,NA-02,PA-08
+1000000000295,Wasif,Active,Yes,Punjab,Lahore,9,69,NA-02,PA-09
+1000000000296,Babar,Active,Yes,Punjab,Lahore,9,70,NA-02,PA-10
+1000000000297,Rizwan,Active,Yes,Sindh,Karachi,14,61,NA-03,PA-11
+1000000000298,Zia ul Haq,Active,Yes,Sindh,Karachi,14,62,NA-03,PA-12
+1000000000299,Farooq,Active,Yes,Sindh,Karachi,14,63,NA-03,PA-13
+1000000000300,Naseem,Active,Yes,Sindh,Karachi,14,64,NA-03,PA-14
+1000000000301,Bilal,Active,Yes,Sindh,Karachi,14,65,NA-03,PA-15
+1000000000302,Babar,Active,Yes,Sindh,Karachi,14,66,NA-03,PA-15
+1000000000303,Tawab,Active,Yes,Sindh,Karachi,14,67,NA-03,PA-11
+1000000000304,Wahab,Active,Yes,Sindh,Karachi,14,68,NA-03,PA-12
+1000000000305,Abdullah,Active,Yes,Sindh,Karachi,14,69,NA-03,PA-13
+1000000000306,Nazim,Active,Yes,Sindh,Karachi,14,70,NA-03,PA-14
+1000000000307,Noureen,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,61,NA-04,PA-17
+1000000000308,Khalid,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,62,NA-04,PA-18
+1000000000309,Kamil,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,63,NA-04,PA-19
+1000000000310,Zahir,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,64,NA-04,PA-20
+1000000000311,Zabeel,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,65,NA-04,PA-16
+1000000000312,Zahoor,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,66,NA-04,PA-17
+1000000000313,Qarar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,67,NA-04,PA-18
+1000000000314,Zarar,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,68,NA-04,PA-19
+1000000000315,Nadir,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,69,NA-04,PA-20
+1000000000316,Naseeb,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,70,NA-04,PA-16
+1000000000317,Nasim,Active,Yes,Islamabad Capital Territory,Islamabad,24,61,NA-05,PA-21
+1000000000318,Nazeer,Active,Yes,Islamabad Capital Territory,Islamabad,24,62,NA-05,PA-22
+1000000000319,Nayab,Active,Yes,Islamabad Capital Territory,Islamabad,24,63,NA-05,PA-23
+1000000000320,Naveed,Active,Yes,Islamabad Capital Territory,Islamabad,24,64,NA-05,PA-24
+1000000000321,Naqeeb,Active,Yes,Islamabad Capital Territory,Islamabad,24,65,NA-05,PA-25
+1000000000322,Hakim,Active,Yes,Islamabad Capital Territory,Islamabad,24,66,NA-05,PA-21
+1000000000323,Farooq,Active,Yes,Islamabad Capital Territory,Islamabad,24,67,NA-05,PA-22
+1000000000324,Shahzil,Active,Yes,Islamabad Capital Territory,Islamabad,24,68,NA-05,PA-23
+1000000000325,Shahid,Active,Yes,Islamabad Capital Territory,Islamabad,24,69,NA-05,PA-24
+1000000000326,Mansoor,Active,Yes,Islamabad Capital Territory,Islamabad,24,70,NA-05,PA-25
+1000000000327,Manzoor,Active,Yes,Punjab,Lahore,9,71,NA-02,PA-06
+1000000000328,Malik,Active,Yes,Punjab,Lahore,9,72,NA-02,PA-07
+1000000000329,Dumar,Active,Yes,Punjab,Lahore,9,73,NA-02,PA-08
+1000000000330,Jabbar,Active,Yes,Punjab,Lahore,9,74,NA-02,PA-09
+1000000000331,Jabir,Active,Yes,Punjab,Lahore,9,75,NA-02,PA-10
+1000000000332,Sabir,Active,Yes,Punjab,Lahore,9,76,NA-02,PA-06
+1000000000333,Saliq,Active,Yes,Punjab,Lahore,9,77,NA-02,PA-07
+1000000000334,Sadan,Active,Yes,Punjab,Lahore,9,78,NA-02,PA-08
+1000000000335,Saleem,Active,Yes,Punjab,Lahore,9,79,NA-02,PA-09
+1000000000336,Kaleem,Active,Yes,Punjab,Lahore,9,80,NA-02,PA-10
+1000000000337,Faheem,Active,Yes,Sindh,Karachi,14,71,NA-03,PA-11
+1000000000338,Waseem,Active,Yes,Sindh,Karachi,14,72,NA-03,PA-12
+1000000000339,Wasit,Active,Yes,Sindh,Karachi,14,73,NA-03,PA-13
+1000000000340,Zubair,Active,Yes,Sindh,Karachi,14,74,NA-03,PA-14
+1000000000341,Jasra,Active,Yes,Sindh,Karachi,14,75,NA-03,PA-15
+1000000000342,Shah Mehmood,Active,Yes,Sindh,Karachi,14,76,NA-03,PA-15
+1000000000343,Zain,Active,Yes,Sindh,Karachi,14,77,NA-03,PA-11
+1000000000344,Abid,Active,Yes,Sindh,Karachi,14,78,NA-03,PA-12
+1000000000345,Inayat Ullah,Active,Yes,Sindh,Karachi,14,79,NA-03,PA-13
+1000000000346,Salar Khan,Active,Yes,Sindh,Karachi,14,80,NA-03,PA-14
+1000000000347,Ahmed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,71,NA-04,PA-17
+1000000000348,Abbas,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,72,NA-04,PA-18
+1000000000349,Ali,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,73,NA-04,PA-19
+1000000000350,Nehad,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,74,NA-04,PA-20
+1000000000351,Hafiz,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,75,NA-04,PA-16
+1000000000352,Sami,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,76,NA-04,PA-17
+1000000000353,Saeed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,77,NA-04,PA-18
+1000000000354,Kaleem,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,78,NA-04,PA-19
+1000000000355,Naveed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,79,NA-04,PA-20
+1000000000356,Waheed,Active,Yes,Khyber Pakhtunkhwa,Peshawar,19,80,NA-04,PA-16
+1000000000357,Azeem,Active,Yes,Islamabad Capital Territory,Islamabad,24,71,NA-05,PA-21
+1000000000358,Ghulam,Active,Yes,Islamabad Capital Territory,Islamabad,24,72,NA-05,PA-22
+1000000000359,Niamat,Active,Yes,Islamabad Capital Territory,Islamabad,24,73,NA-05,PA-23
+1000000000360,Nasim,Active,Yes,Balochistan,Quetta,3,47,NA-01,PA-01
+1000000000361,Nazeer,Active,Yes,Balochistan,Quetta,3,48,NA-01,PA-02
+1000000000362,Nayab,Active,Yes,Balochistan,Quetta,3,49,NA-01,PA-03
+1000000000363,Naveed,Active,Yes,Balochistan,Quetta,3,50,NA-01,PA-04
+1000000000364,Naqeeb,Active,Yes,Balochistan,Quetta,3,51,NA-01,PA-05
+1000000000365,Hakim,Active,Yes,Balochistan,Quetta,3,52,NA-01,PA-01
+1000000000366,Farooq,Active,Yes,Balochistan,Quetta,3,53,NA-01,PA-02
+1000000000367,Shahzil,Active,Yes,Balochistan,Quetta,3,54,NA-01,PA-03
+1000000000368,Shahid,Active,Yes,Balochistan,Quetta,3,55,NA-01,PA-04
+1000000000369,Mansoor,Active,Yes,Balochistan,Quetta,3,56,NA-01,PA-01
+1000000000370,Manzoor,Active,Yes,Balochistan,Quetta,3,57,NA-01,PA-02
+1000000000371,Malik,Active,Yes,Balochistan,Quetta,3,58,NA-01,PA-03
+1000000000372,Dumar,Active,Yes,Balochistan,Quetta,3,59,NA-01,PA-04
+1000000000373,Jabbar,Active,Yes,Balochistan,Quetta,3,60,NA-01,PA-05
+1000000000374,Jabir,Active,Yes,Balochistan,Quetta,4,61,NA-01,PA-01
+1000000000375,Sabir,Active,Yes,Balochistan,Quetta,4,62,NA-01,PA-02
+1000000000376,Saliq,Active,Yes,Balochistan,Quetta,4,63,NA-01,PA-03
+1000000000377,Sadan,Active,Yes,Balochistan,Quetta,4,64,NA-01,PA-04
+1000000000378,Saleem,Active,Yes,Balochistan,Quetta,4,65,NA-01,PA-01
+1000000000379,Kaleem,Active,Yes,Balochistan,Quetta,4,66,NA-01,PA-02
+1000000000380,Faheem,Active,Yes,Balochistan,Quetta,4,67,NA-01,PA-03
+1000000000381,Waseem,Active,Yes,Balochistan,Quetta,4,68,NA-01,PA-04
+1000000000382,Wasit,Active,Yes,Balochistan,Quetta,4,69,NA-01,PA-05
+1000000000383,Zubair,Active,Yes,Balochistan,Quetta,4,70,NA-01,PA-01
+1000000000384,Jasra,Active,Yes,Balochistan,Quetta,4,71,NA-01,PA-02
+1000000000385,Shah Mehmood,Active,Yes,Balochistan,Quetta,4,72,NA-01,PA-03
+1000000000386,Zain,Active,Yes,Balochistan,Quetta,4,73,NA-01,PA-04
+1000000000387,Abid,Active,Yes,Balochistan,Quetta,4,74,NA-01,PA-01
+1000000000388,Inayat Ullah,Active,Yes,Balochistan,Quetta,4,75,NA-01,PA-02
+1000000000389,Salar Khan,Active,Yes,Balochistan,Quetta,4,76,NA-01,PA-03
+1000000000390,Ahmed,Active,Yes,Balochistan,Quetta,4,77,NA-01,PA-04
+1000000000391,Abbas,Active,Yes,Balochistan,Quetta,4,78,NA-01,PA-05
+1000000000392,Ali,Active,Yes,Balochistan,Quetta,4,79,NA-01,PA-01
+1000000000393,Nehad,Active,Yes,Balochistan,Quetta,4,80,NA-01,PA-02
+1000000000394,Hafiz,Active,Yes,Balochistan,Quetta,5,81,NA-01,PA-03
+1000000000395,Sami,Active,Yes,Balochistan,Quetta,5,82,NA-01,PA-04
+1000000000396,Saeed,Active,Yes,Balochistan,Quetta,5,83,NA-01,PA-01
+1000000000397,Kaleem,Active,Yes,Balochistan,Quetta,5,84,NA-01,PA-01
+1000000000398,Naveed,Active,Yes,Balochistan,Quetta,5,85,NA-01,PA-02

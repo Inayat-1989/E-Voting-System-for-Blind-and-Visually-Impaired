@@ -1,10 +1,10 @@
 Main Section: (New App for Admin management Reports and other things.)
-Creating an app with special urls only admin can access them.
-admins open election there with abstraction and encapsulation, all models are hidden from them
-admins can add a csv file for registered candidates list, all polling stations list and voters list.
-Admin would then create an election for each election all voters has_voted value cleaned
-At the Creation of elections all tables would be created for all the database, which includes creation of polling station, constituencies, candidates, and voters.
-Admin can't see who voted or whom didn't and the na or pa of any voters
+--Completed--Creating an app with special urls only admin can access them.
+--Completed--admins open election there with abstraction and encapsulation, all models are hidden from them
+--Completed--admins can add a csv file for registered candidates list, all polling stations list and voters list.
+--Completed--Admin would then create an election for each election all voters has_voted value cleaned
+--Completed--At the Creation of elections all tables would be created for all the database, which includes creation of polling station, constituencies, candidates, and voters.
+--Completed--Admin can't see who voted or whom didn't and the na or pa of any voters
 Constiuency value for registered voters would increase according to the voter constiuency calculation
 A ballotbox cannot have total votes more than the registered votes
 At the end of election, admins would automatically be shown the report (or they can generate it), reports would be categorized based on Assembly and further categorization by constituencies and then by candidates and their total sum of votes accross all polling stations (this must be applied current model is wrong, for example let's say a candidate is trying to get voted for na-22, many polling stations would allow this na-22 in their ballot box, and at the end all boxes and their votes are calculated across all ballot box around all polling stations)

@@ -2,6 +2,7 @@ import csv
 import io
 
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -14,35 +15,42 @@ from .forms import ECPBulkUploadForm, ElectionForm
 User = get_user_model()
 
 
-def ecp_dashboard(request):
-    return render(request, "ecp_admin/login.html")
-
-
 def ecp_login(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        election = Election.objects.first()
-        return render(request, "ecp_admin/menu.html", {"election": election})
     if request.method == "POST":
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
         ecp_admin = authenticate(request, username=username, password=password)
+
         if not ecp_admin:
             messages.error(request, "No ECP Admin found with that Username and Password.")
             return render(request, "ecp_admin/login.html")
+
         login(request, ecp_admin)
+        if not request.session.session_key:
+            request.session.create()
+
         ecp_admin.current_session_key = request.session.session_key
         ecp_admin.save()
+
         messages.success(request, "Welcome ECP Admin!")
+        return redirect("../")
+    return render(request, "ecp_admin/login.html")
+
+
+def ecp_dashboard(request):
+    if request.user.is_authenticated and request.user.is_staff:
         election = Election.objects.first()
         return render(request, "ecp_admin/menu.html", {"election": election})
     return render(request, "ecp_admin/login.html")
 
 
+@staff_member_required(login_url="../")
 def ecp_election_creation_form(request):
     form = ElectionForm()
     return render(request, "ecp_admin/election.html", {"form": form})
 
 
+@staff_member_required(login_url="../")
 def ecp_election_upload(request):
     if request.method == "POST":
         form = ElectionForm(request.POST)
@@ -62,6 +70,7 @@ def ecp_election_upload(request):
     return render(request, "ecp_admin/election.html")
 
 
+@staff_member_required(login_url="../")
 def ecp_report(request):
     all_ballot_boxes = BallotBox.objects.all()
 
@@ -75,6 +84,7 @@ def ecp_report(request):
     return render(request, "ecp_admin/reports.html", {"na_count": na_count, "pa_count": pa_count})
 
 
+@staff_member_required(login_url="../")
 def ecp_na_constituencies(request):
     na_constituencies = Constituency.objects.filter(assembly_type="NATIONAL")
     if not na_constituencies.exists():
@@ -83,6 +93,7 @@ def ecp_na_constituencies(request):
     return render(request, "ecp_admin/na_constituencies.html", {"na_constituencies": na_constituencies})
 
 
+@staff_member_required(login_url="../")
 def ecp_pa_constituencies(request):
     pa_constituencies = Constituency.objects.filter(assembly_type="PROVINCIAL")
     if not pa_constituencies.exists():
@@ -91,6 +102,7 @@ def ecp_pa_constituencies(request):
     return render(request, "ecp_admin/pa_constituencies.html", {"pa_constituencies": pa_constituencies})
 
 
+@staff_member_required(login_url="../")
 def ecp_na_candidates(request, constituency_id):
     na_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
     vote_tallies = BallotBox.objects.filter(constituency_id=constituency_id).values_list("vote_tallies", flat=True)
@@ -107,6 +119,7 @@ def ecp_na_candidates(request, constituency_id):
     return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
 
 
+@staff_member_required(login_url="../")
 def ecp_pa_candidates(request, constituency_id):
     pa_constituency_candidates = Candidate.objects.filter(constituency_id=constituency_id)
     vote_tally = BallotBox.objects.filter(constituency_id=constituency_id).first().vote_tallies
@@ -121,8 +134,8 @@ def ecp_pa_candidates(request, constituency_id):
     return render(request, "ecp_admin/na_candidate.html", {"candidate_count": candidate_count})
 
 
-# @staff_member_required(login_url="/login/")
-def ecp_election_data(request):  # noqa: C901
+@staff_member_required(login_url="../")
+def ecp_election_data(request):  # noqa: C901, PLR0912, PLR0915
     election = Election.objects.first()
     if not election:
         messages.error(request, "Error: You must configure an Election instance before uploading data files.")
@@ -157,7 +170,6 @@ def ecp_election_data(request):  # noqa: C901
                         "city": row[5],
                         "block_code": row[6],
                         "serial_number": row[7],
-                        "is_biometrically_verified": True,
                     },
                 )
 
@@ -194,6 +206,7 @@ def ecp_election_data(request):  # noqa: C901
                         "registered_voters_count": registered_voters_count_for_pa,
                     },
                 )
+
                 if constituency_mapping.block_code in block_code_list:
                     continue
                 block_code_list = ConstituencyMapping.objects.filter(
@@ -241,7 +254,6 @@ def ecp_election_data(request):  # noqa: C901
             station_file = request.FILES["polling_stations_file"]
             station_data = csv.reader(io.StringIO(station_file.read().decode("utf-8")))
             next(station_data)  # Skip header
-
             for row in station_data:
                 constituency_mapping = ConstituencyMapping.objects.get(block_code=row[3])
                 constituency_na = constituency_mapping.constituency_na
@@ -265,8 +277,6 @@ def ecp_election_data(request):  # noqa: C901
                         "block_code": row[3],
                         "serial_number_start_from": row[4],
                         "serial_number_end_at": row[5],
-                        "constituency_na": row[6],
-                        "constituency_pa": row[7],
                     },
                 )
 
@@ -296,12 +306,13 @@ def ecp_election_data(request):  # noqa: C901
                     },
                 )
         messages.success(request, "All systems integrated successfully! Database updated.")
-        return redirect("../login/")
+        return redirect("../")
     except Exception as e:  # noqa: BLE001
         messages.error(request, f"Database insertion aborted! Formatting or index error detected: {e}")
-    return redirect("../login/")
+    return redirect("../")
 
 
+@staff_member_required(login_url="../")
 def ecp_logout(request):
     if request.user.is_authenticated:
         request.user.current_session_key = None

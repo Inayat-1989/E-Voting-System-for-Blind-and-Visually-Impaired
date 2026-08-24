@@ -1,5 +1,3 @@
-import datetime
-
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,7 +5,7 @@ from django.utils import timezone
 
 
 def get_default_start_time():
-    return timezone.make_aware(datetime.datetime(2028, 2, 10, 6, 0, 0))
+    return timezone.now()
 
 
 def get_default_end_time():
@@ -118,9 +116,9 @@ class Candidate(models.Model):
     candidate_id = models.CharField(max_length=50, default="CAND-000")
     name = models.CharField(max_length=255, default="")
     political_party = models.CharField(max_length=100, default="Independent")
+    assigned_symbol = models.ImageField(upload_to="election_symbols/", blank=True, null=True)
     province = models.CharField(max_length=255, default="Punjab")
     city = models.CharField(max_length=255, default="Lahore")
-    assigned_symbol = models.ImageField(upload_to="election_symbols/", blank=True, null=True)
     assembly_type = models.CharField(max_length=255, default="NATIONAL")
     constituency = models.ForeignKey(Constituency, on_delete=models.CASCADE, related_name="candidates")
 
@@ -133,15 +131,12 @@ class PollingStation(models.Model):
 
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="polling_stations")
     station_id = models.CharField(max_length=50, primary_key=True, default="STATION-000")
-    location_name = models.CharField(max_length=255, default="Government Building")  # 0
+    location_name = models.CharField(max_length=255, default="Government Building")
     province = models.CharField(max_length=255, default="Punjab")
     city = models.CharField(max_length=255, default="Lahore")
-    block_code = models.CharField(max_length=255, default="0")  # 3
-    serial_number_start_from = models.IntegerField(default=1)  # 4
-    serial_number_end_at = models.IntegerField(default=999)  # 5
-    constituency_na = models.CharField(max_length=20, default="NA-00")  # 6
-    constituency_pa = models.CharField(max_length=20, default="PA-00")  # 7
-    is_connected_to_central_server = models.BooleanField(default=True)
+    block_code = models.CharField(max_length=255, default="0")
+    serial_number_start_from = models.IntegerField(default=1)
+    serial_number_end_at = models.IntegerField(default=999)
 
     def __str__(self):
         return f"Station {self.station_id} - {self.location_name}"

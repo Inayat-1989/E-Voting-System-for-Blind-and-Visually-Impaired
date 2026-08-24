@@ -2,16 +2,16 @@ from django.db import models
 
 
 class Voter(models.Model):
-    cnic = models.CharField(max_length=13, unique=True, default="")  # 0
-    full_name = models.CharField(max_length=255, default="")  # 1
-    province = models.CharField(max_length=50, default="Punjab")  # 4
-    city = models.CharField(max_length=50, default="Lahore")  # 5
-    block_code = models.CharField(max_length=255, default="0")  # 6
-    serial_number = models.IntegerField(default=0)  # 7
+    cnic = models.CharField(max_length=13, unique=True, default="")
+    full_name = models.CharField(max_length=255, default="")
+    province = models.CharField(max_length=50, default="Punjab")
+    city = models.CharField(max_length=50, default="Lahore")
+    block_code = models.CharField(max_length=255, default="0")
+    serial_number = models.IntegerField(default=0)
 
     has_voted_na = models.BooleanField(default=False)
     has_voted_pa = models.BooleanField(default=False)
-    is_biometrically_verified = models.BooleanField(default=False)
+
     current_session_key = models.CharField(max_length=40, blank=True, null=True)
 
     def __str__(self):
@@ -19,12 +19,12 @@ class Voter(models.Model):
 
     @property
     def serial_range(self):
-        """Returns a tuple of (start, end) based on groups of 20"""
-        if self.serial_number < 1:
-            return (0, 0)  # Handles edge cases safely
+        """Returns a tuple of (start, end) for a 100-voter block based on serial_number."""
+        if self.serial_number < 1 or self.serial_number > 500:  # noqa: PLR2004
+            return (0, 0)
 
-        # Calculate the start of the 20-voter block
-        start = ((self.serial_number - 1) // 20) * 20 + 1
-        end = start + 19
+        # Calculate start (1, 101, 201, 301, or 401) and end of the 100-voter block
+        start = ((self.serial_number - 1) // 100) * 100 + 1
+        end = start + 99
 
         return start, end

@@ -3,7 +3,12 @@
 
 {% block content %}
 <nav>
-    <a href="{% url 'ecp_logout' %}">Logout</a>
+    <form action="{% url 'ecp_logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" >
+                Logout
+        </button>
+    </form>
 </nav>
 <button onclick="history.back()">Go Back</button>
 {% if request.user.is_authenticated and request.user.is_staff %}
@@ -91,7 +96,7 @@
                 Next: Upload CSV Data
             </button>
             
-            <a href="{% url 'ecp_login' %}" class="btn" style="background: transparent; color: var(--text); border-color: var(--border);">
+            <a href="{% url 'ecp_dashboard' %}" class="btn">
                 Cancel Initialization
             </a>
         </div>

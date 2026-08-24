@@ -1,29 +1,54 @@
 import json
 
 from django.contrib import messages
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from .models import Voter
 
 
 def login_voter(request):
+    if "voter_id" in request.session:
+        return redirect("elections")
+
     if request.method == "POST":
         cnic_input = request.POST.get("cnic", "").strip()
-        voter = Voter.objects.filter(cnic=cnic_input).first()
-        if not voter:
-            messages.error(request, "No voter found with that CNIC.")
-            return render(request, "accounts/login.html")
+
         if not request.session.session_key:
             request.session.create()
-        voter.current_session_key = request.session.session_key
+        else:
+            request.session.cycle_key()
+
+        with transaction.atomic():
+            voter = Voter.objects.select_for_update().filter(cnic=cnic_input).first()
+
+            if not voter:
+                messages.error(request, "No voter found with that CNIC.")
+                return render(request, "accounts/login.html")
+
+            Voter.objects.filter(id=voter.id).update(current_session_key=request.session.session_key)
+
         request.session["voter_id"] = voter.id
-        voter.save()
-        messages.success(request, "You are a verified Disabled User. Welcome!")
+
+        messages.success(request, f"{voter.full_name}, you are a verified Disabled User. Welcome!")
         return redirect("elections")
 
     return render(request, "accounts/login.html")
+
+
+@require_POST
+def logout_voter(request):
+    voter_id = request.session.get("voter_id")
+    if voter_id:
+        Voter.objects.filter(id=voter_id).update(current_session_key=None)
+
+    request.session.flush()
+
+    messages.success(request, "You have been logged out successfully.")
+    return redirect("login")
 
 
 @csrf_exempt  # Use proper CSRF tokens in production
@@ -42,9 +67,3 @@ def process_speech(request):
             return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
     return JsonResponse({"status": "error", "message": "Only POST allowed"}, status=405)
-
-
-def logout_voter(request):
-    request.session.flush()
-    messages.success(request, "You have been logged out.")
-    return redirect("login")

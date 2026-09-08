@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("audio", audioBlob, "voter_speech.webm");
 
         try {
-            const response = await fetch("/accounts/api/process-speech/", {
+            const response = await fetch("/api/process-speech/", {
                 method: "POST",
                 body: formData
             });

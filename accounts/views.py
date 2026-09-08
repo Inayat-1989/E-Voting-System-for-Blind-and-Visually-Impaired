@@ -1,86 +1,80 @@
 import json
-import os 
+import os
+import uuid
+
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from openai import OpenAI  # OpenAI client for Whisper API
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
+from gtts import gTTS
+from faster_whisper import WhisperModel
+
 from .models import Voter
-from elevenlabs.client import ElevenLabs
 
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-gemini_client = genai.Client()
-eleven_client = ElevenLabs()
+# ---------- Lazy-loaded models/clients ----------
 
-import os
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from openai import OpenAI
+_whisper_model = None
 
-def get_openai_client():
-    """
-    Safely retrieves the OpenAI API key and instantiates the client.
-    Fails only when an API call is attempted, not during server startup.
-    """
-    api_key = os.environ.get("OPENAI_API_KEY")
+def get_whisper_model():
+    global _whisper_model
+    if _whisper_model is None:
+        _whisper_model = WhisperModel("small", device="cpu", compute_type="int8")
+    return _whisper_model
+
+
+def get_gemini_client():
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY is not set in environment variables.")
-    return OpenAI(api_key=api_key)
+        raise ValueError("GEMINI_API_KEY is missing from environment variables.")
+    return genai.Client(api_key=api_key)
 
-def analyze_vote_view(request):
-    """
-    Example view utilizing the OpenAI client safely.
-    """
-    if request.method == "POST":
-        user_input = request.POST.get("prompt", "")
-        
-        try:
-            client = get_openai_client()
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": user_input}]
-            )
-            result = response.choices[0].message.content
-            return render(request, "accounts/result.html", {"result": result})
-            
-        except ValueError as e:
-            messages.error(request, str(e))
-            return redirect("home")
-        except Exception as e:
-            messages.error(request, f"OpenAI API Error: {str(e)}")
-            return redirect("home")
-
-    return render(request, "accounts/analyze.html")
-
-# Schema for structured JSON output from Gemini
 
 class UserIntentSchema(BaseModel):
-    action: str  # e.g., "login", "help", "unknown"
-    cnic: str    # Cleaned CNIC string with digits only, e.g., "4210112345671"
+    action: str  # "login", "help", "repeat", or "unknown"
+    cnic: str    # digits only, e.g. "4210112345671", empty string if none found
 
+
+# ---------- Scripted Urdu responses (you control every word here) ----------
+
+SCRIPTED_MESSAGES = {
+    "welcome": "Khush aamdeed. Apna shanakhti card number bolein, jo terah numbers ka hota hai.",
+    "help": "Apna shanakhti card number bolein. Jaise char do ek zero one do teen char panch che saat aath zero ek.",
+    "repeat": "Theek hai, dobara bolein. Apna shanakhti card number saaf saaf bolein.",
+    "unknown": "Samajh nahi aaya. Sirf apna shanakhti card number bolein.",
+    "silence": "Awaz samajh nahi aayi. Dobara koshish karein.",
+    "login_success": "Aap ki tasdeeq ho gayi hai. Khush aamdeed.",
+    "login_not_found": "Yeh number hamare paas mojood nahi hai.",
+    "max_attempts": "Baar baar koshish ke bawajood tasdeeq nahi hui. Bara-e-karam staff se baat karein.",
+}
+
+MAX_ATTEMPTS = 5
+
+def start_voice_login(request):
+    """Called once when the voter clicks Start. Resets the attempt counter and speaks the welcome message."""
+    request.session["voice_attempts"] = 0
+    audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["welcome"])
+    return JsonResponse({
+        "status": "info",
+        "message": SCRIPTED_MESSAGES["welcome"],
+        "audio_url": audio_url,
+        "continue_listening": True
+})
 
 def generate_urdu_tts(text_prompt):
-    """Generates audio file using ElevenLabs Urdu voice model and returns relative URL."""
-    audio_stream = eleven_client.generate(
-        text=text_prompt,
-        voice="Rachel",  # Select an Urdu-supported voice ID or custom voice from your ElevenLabs dashboard
-        model="eleven_multilingual_v2"
-    )
-    
-    # Save audio file to static directory for playback
+    """Generates Urdu speech audio using gTTS and returns a URL the browser can play."""
+    tts = gTTS(text=text_prompt, lang="ur")
+
     audio_filename = f"response_{uuid.uuid4().hex[:8]}.mp3"
     output_dir = os.path.join("static", "accounts", "audio")
     os.makedirs(output_dir, exist_ok=True)
     file_path = os.path.join(output_dir, audio_filename)
-    
-    with open(file_path, "wb") as f:
-        for chunk in audio_stream:
-            f.write(chunk)
-            
+
+    tts.save(file_path)
     return f"/static/accounts/audio/{audio_filename}"
+
 
 def login_voter(request):
     if request.method == "POST":
@@ -109,56 +103,73 @@ def process_speech(request):
     if not audio_file:
         return JsonResponse({"status": "error", "message": "No audio file provided."}, status=400)
 
-    # 1. Save temporary audio file
     temp_dir = os.path.join("files", "temp_audio")
     os.makedirs(temp_dir, exist_ok=True)
-    temp_path = os.path.join(temp_dir, audio_file.name)
+    temp_path = os.path.join(temp_dir, f"{uuid.uuid4().hex}.webm")
 
     with open(temp_path, "wb+") as destination:
         for chunk in audio_file.chunks():
             destination.write(chunk)
 
     try:
-        # 2. OpenAI Whisper API (Speech to Text)
-        with open(temp_path, "rb") as audio:
-            transcription = openai_client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=audio,
-                language="ur"
-            )
-        user_text = transcription.text.strip()
+        # 1. Local Whisper (Speech to Text)
+        model = get_whisper_model()
+        segments, info = model.transcribe(temp_path, language="ur")
+        user_text = "".join(segment.text for segment in segments).strip()
 
-        # Clean up audio file
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-        # 3. Gemini Flash API (Intent Extraction & CNIC Parsing)
+        if not user_text:
+            audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["silence"])
+            return JsonResponse({
+                "status": "error", "action": "silence",
+                "message": SCRIPTED_MESSAGES["silence"], "audio_url": audio_url
+            }, status=400)
+
+        # 2. Gemini: classify intent (login / help / repeat / unknown)
         prompt = f"""
-        Extract the user's login intent and CNIC number from this spoken text:
+        Classify the voter's spoken text during a voice-based login screen:
         "{user_text}"
-        
+
         Rules:
-        1. Extract the 13-digit CNIC if present (digits only, no dashes). 
-           Convert spoken Urdu digits or text numbers (e.g., 'چار دو ایک zero') to numeric digits.
-        2. Set 'action' to 'login' if user intends to log in or provided CNIC numbers.
-        3. If no CNIC digits are detected, set 'action' to 'unknown' and 'cnic' to empty string "".
+        1. If the text contains a 13-digit CNIC (digits only, no dashes; convert
+           spoken words/numbers to numeric digits), set action="login" and cnic to those digits.
+        2. If the voter sounds confused, lost, or is asking what to do / how this works,
+           set action="help" and cnic to "".
+        3. If the voter is asking you to repeat or say the instructions again,
+           set action="repeat" and cnic to "".
+        4. Otherwise, set action="unknown" and cnic to "".
         """
 
-        gemini_response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=UserIntentSchema,
-            ),
-        )
+        gemini_client = get_gemini_client()
+        intent_data = None
+        last_error = None
 
-        # Parse Gemini JSON response
-        intent_data = json.loads(gemini_response.text)
+        for attempt in range(3):
+            try:
+                gemini_response = gemini_client.models.generate_content(
+                    model="gemini-3.6-flash",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=UserIntentSchema,
+                    ),
+                )
+                intent_data = json.loads(gemini_response.text)
+                break
+            except Exception as e:
+                last_error = e
 
-        # 4. Perform Voter Lookup and Session Creation
-        if intent_data.get("action") == "login" and intent_data.get("cnic"):
-            cnic_input = intent_data["cnic"]
+        if intent_data is None:
+            raise last_error
+
+        action = intent_data.get("action")
+        cnic_input = intent_data.get("cnic", "")
+
+        attempts = request.session.get("voice_attempts", 0)
+
+        if action == "login" and cnic_input:
             voter = Voter.objects.filter(cnic=cnic_input).first()
 
             if voter:
@@ -167,29 +178,69 @@ def process_speech(request):
                 voter.current_session_key = request.session.session_key
                 request.session["voter_id"] = voter.id
                 voter.save()
+                request.session["voice_attempts"] = 0
 
+                audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["login_success"])
                 return JsonResponse({
                     "status": "success",
                     "action": "login",
                     "cnic": cnic_input,
                     "voter_id": voter.id,
-                    "message": "Voter authenticated successfully.",
-                    "transcription": user_text
+                    "message": SCRIPTED_MESSAGES["login_success"],
+                    "audio_url": audio_url,
+                    "transcription": user_text,
+                    "continue_listening": False,
+                    "redirect_url": "/elections/"
                 })
             else:
+                attempts += 1
+                request.session["voice_attempts"] = attempts
+                if attempts >= MAX_ATTEMPTS:
+                    audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["max_attempts"])
+                    return JsonResponse({
+                        "status": "error", "action": "max_attempts",
+                        "message": SCRIPTED_MESSAGES["max_attempts"],
+                        "audio_url": audio_url, "continue_listening": False
+                    }, status=404)
+
+                audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["login_not_found"])
                 return JsonResponse({
                     "status": "error",
                     "action": "login_failed",
                     "cnic": cnic_input,
-                    "message": f"No voter found with CNIC {cnic_input}.",
-                    "transcription": user_text
+                    "message": SCRIPTED_MESSAGES["login_not_found"],
+                    "audio_url": audio_url,
+                    "transcription": user_text,
+                    "continue_listening": True
                 }, status=404)
 
+        elif action in ("help", "repeat", "unknown"):
+            attempts += 1
+            request.session["voice_attempts"] = attempts
+            if attempts >= MAX_ATTEMPTS:
+                audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["max_attempts"])
+                return JsonResponse({
+                    "status": "error", "action": "max_attempts",
+                    "message": SCRIPTED_MESSAGES["max_attempts"],
+                    "audio_url": audio_url, "continue_listening": False
+                }, status=400)
+
+            audio_url = generate_urdu_tts(SCRIPTED_MESSAGES[action])
+            return JsonResponse({
+                "status": "info",
+                "action": action,
+                "message": SCRIPTED_MESSAGES[action],
+                "audio_url": audio_url,
+                "transcription": user_text,
+                "continue_listening": True
+            })
+
+        audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["unknown"])
         return JsonResponse({
-            "status": "error",
-            "action": "unknown",
-            "message": "Could not extract valid CNIC or login intent.",
-            "transcription": user_text
+            "status": "error", "action": "unknown",
+            "message": SCRIPTED_MESSAGES["unknown"],
+            "audio_url": audio_url, "transcription": user_text,
+            "continue_listening": True
         }, status=400)
 
     except Exception as e:

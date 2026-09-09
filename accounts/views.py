@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import uuid
 
 from django.contrib import messages
@@ -21,7 +22,8 @@ _whisper_model = None
 def get_whisper_model():
     global _whisper_model
     if _whisper_model is None:
-        _whisper_model = WhisperModel("small", device="cpu", compute_type="int8")
+        _whisper_model = WhisperModel("base", device="cpu", compute_type="int8")
+        print("DEBUG: Whisper model loaded as 'base'")
     return _whisper_model
 
 
@@ -33,11 +35,9 @@ def get_gemini_client():
 
 
 class UserIntentSchema(BaseModel):
-    action: str  # "login", "help", "repeat", or "unknown"
-    cnic: str    # digits only, e.g. "4210112345671", empty string if none found
+    action: str  # "login", "help", "repeat", "incomplete_cnic", or "unknown"
+    cnic: str
 
-
-# ---------- Scripted Urdu responses (you control every word here) ----------
 
 SCRIPTED_MESSAGES = {
     "welcome": "Khush aamdeed. Apna shanakhti card number bolein, jo terah numbers ka hota hai.",
@@ -48,30 +48,20 @@ SCRIPTED_MESSAGES = {
     "login_success": "Aap ki tasdeeq ho gayi hai. Khush aamdeed.",
     "login_not_found": "Yeh number hamare paas mojood nahi hai.",
     "max_attempts": "Baar baar koshish ke bawajood tasdeeq nahi hui. Bara-e-karam staff se baat karein.",
+    "incomplete_cnic": "Apka CNIC number pura nahi hai. Bara-e-marbani pura CNIC number bolein.",
 }
 
-MAX_ATTEMPTS = 5
+MAX_ATTEMPTS = 3
+print(f"DEBUG: MAX_ATTEMPTS is set to {MAX_ATTEMPTS}")
 
-def start_voice_login(request):
-    """Called once when the voter clicks Start. Resets the attempt counter and speaks the welcome message."""
-    request.session["voice_attempts"] = 0
-    audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["welcome"])
-    return JsonResponse({
-        "status": "info",
-        "message": SCRIPTED_MESSAGES["welcome"],
-        "audio_url": audio_url,
-        "continue_listening": True
-})
 
 def generate_urdu_tts(text_prompt):
     """Generates Urdu speech audio using gTTS and returns a URL the browser can play."""
     tts = gTTS(text=text_prompt, lang="ur")
-
     audio_filename = f"response_{uuid.uuid4().hex[:8]}.mp3"
     output_dir = os.path.join("static", "accounts", "audio")
     os.makedirs(output_dir, exist_ok=True)
     file_path = os.path.join(output_dir, audio_filename)
-
     tts.save(file_path)
     return f"/static/accounts/audio/{audio_filename}"
 
@@ -94,6 +84,18 @@ def login_voter(request):
     return render(request, "accounts/login.html")
 
 
+def start_voice_login(request):
+    """Called once when the voter clicks Start. Resets the attempt counter and speaks the welcome message."""
+    request.session["voice_attempts"] = 0
+    audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["welcome"])
+    return JsonResponse({
+        "status": "info",
+        "message": SCRIPTED_MESSAGES["welcome"],
+        "audio_url": audio_url,
+        "continue_listening": True
+    })
+
+
 @csrf_exempt
 def process_speech(request):
     if request.method != "POST":
@@ -112,10 +114,12 @@ def process_speech(request):
             destination.write(chunk)
 
     try:
-        # 1. Local Whisper (Speech to Text)
+        # ---------- Whisper (Speech to Text) ----------
+        whisper_start = time.time()
         model = get_whisper_model()
         segments, info = model.transcribe(temp_path, language="ur")
         user_text = "".join(segment.text for segment in segments).strip()
+        print(f"DEBUG: Whisper took {time.time() - whisper_start:.1f} seconds")
 
         if os.path.exists(temp_path):
             os.remove(temp_path)
@@ -124,24 +128,28 @@ def process_speech(request):
             audio_url = generate_urdu_tts(SCRIPTED_MESSAGES["silence"])
             return JsonResponse({
                 "status": "error", "action": "silence",
-                "message": SCRIPTED_MESSAGES["silence"], "audio_url": audio_url
+                "message": SCRIPTED_MESSAGES["silence"], "audio_url": audio_url,
+                "continue_listening": True
             }, status=400)
 
-        # 2. Gemini: classify intent (login / help / repeat / unknown)
+        # ---------- Gemini (Intent classification) ----------
         prompt = f"""
         Classify the voter's spoken text during a voice-based login screen:
         "{user_text}"
 
         Rules:
-        1. If the text contains a 13-digit CNIC (digits only, no dashes; convert
+        1. If the text contains exactly a 13-digit CNIC (digits only, no dashes; convert
            spoken words/numbers to numeric digits), set action="login" and cnic to those digits.
-        2. If the voter sounds confused, lost, or is asking what to do / how this works,
+        2. If the text contains some digits but fewer than 13, set action="incomplete_cnic"
+           and cnic to whatever digits were found.
+        3. If the voter sounds confused, lost, or is asking what to do / how this works,
            set action="help" and cnic to "".
-        3. If the voter is asking you to repeat or say the instructions again,
+        4. If the voter is asking you to repeat or say the instructions again,
            set action="repeat" and cnic to "".
-        4. Otherwise, set action="unknown" and cnic to "".
+        5. Otherwise, set action="unknown" and cnic to "".
         """
 
+        gemini_start = time.time()
         gemini_client = get_gemini_client()
         intent_data = None
         last_error = None
@@ -149,7 +157,7 @@ def process_speech(request):
         for attempt in range(3):
             try:
                 gemini_response = gemini_client.models.generate_content(
-                    model="gemini-3.6-flash",
+                    model="gemini-3.5-flash-lite",
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -161,13 +169,16 @@ def process_speech(request):
             except Exception as e:
                 last_error = e
 
+        print(f"DEBUG: Gemini took {time.time() - gemini_start:.1f} seconds")
+
         if intent_data is None:
             raise last_error
 
         action = intent_data.get("action")
         cnic_input = intent_data.get("cnic", "")
-
         attempts = request.session.get("voice_attempts", 0)
+
+        # ---------- Routing ----------
 
         if action == "login" and cnic_input:
             voter = Voter.objects.filter(cnic=cnic_input).first()
@@ -214,7 +225,7 @@ def process_speech(request):
                     "continue_listening": True
                 }, status=404)
 
-        elif action in ("help", "repeat", "unknown"):
+        elif action in ("help", "repeat", "unknown", "incomplete_cnic"):
             attempts += 1
             request.session["voice_attempts"] = attempts
             if attempts >= MAX_ATTEMPTS:
